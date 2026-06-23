@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import POSPage from './pages/POSPage';
 import { getToken, clearToken } from './services/api';
 import * as authService from './services/authService';
 import { AppProvider } from './context/AppContext';
