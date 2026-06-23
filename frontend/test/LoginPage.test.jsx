@@ -2,7 +2,19 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import LoginPage from '../src/pages/LoginPage.jsx';
 import * as authService from '../src/services/authService.js';
-  
+
+// Mock para sa localStorage upang maiwasan ang TypeError: localStorage.clear is not a function
+const localStorageMock = (() => {
+  let store = {};
+  return {
+    getItem: (key) => store[key] || null,
+    setItem: (key, value) => { store[key] = value.toString(); },
+    clear: () => { store = {}; },
+    removeItem: (key) => { delete store[key]; },
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 vi.mock('../src/services/authService.js');
 
