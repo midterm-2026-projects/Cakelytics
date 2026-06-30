@@ -1,3 +1,5 @@
+// src/context/AppContext.jsx
+
 // MOCK VERSION — habang naka-mock pa ang backend.
 // Parehong shape ng value object sa totoong (DB-connected) version,
 // para sa future swap, palitan na lang ang LOOB nito — hindi na
@@ -5,50 +7,131 @@
 // ng useApp().
 
 import { createContext, useContext, useState } from 'react';
+import { mockDB } from '../data/mockDatabase'; // I-import ang localized in-memory database file
 
 const AppContext = createContext(null);
+const BASE_URL = 'http://localhost:4000/inventory'; // /inventory na ang unahan ng controllers
 
 export function AppProvider({ children }) {
-  // ── State (lahat walang-laman/default muna) ──────────────
-  const [products,       setProducts]       = useState([]);
+  // ── State (Lazy initialization para maiwasan ang ESLint cascading render warning) ──
+  const [ingredients,    setIngredients]    = useState(() => mockDB.getIngredients());
+  const [materials,      setMaterials]      = useState(() => mockDB.getMaterials());
+  const [recipes,        setRecipes]        = useState(() => mockDB.getRecipes());
+  const [productionLogs, setProductionLogs] = useState(() => mockDB.getProductionLogs());
+  const [wasteLogs,      setWasteLogs]      = useState(() => mockDB.getWasteLogs());
+  const [products,       setProducts]       = useState(() => mockDB.getProducts());
   const [orders,         setOrders]         = useState([]);
-  const [ingredients,    setIngredients]    = useState([]);
-  const [materials,      setMaterials]      = useState([]);
-  const [recipes,        setRecipes]        = useState([]);
-  const [wasteLogs,      setWasteLogs]      = useState([]);
-  const [productionLogs, setProductionLogs] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
 
-  // ── No-op loaders (papalitan ng totoong fetch sa future) ──
-  const fetchAll    = async () => {};
+  // ── Helper Function para i-synchronize ang UI State sa tuwing may magbabago sa Mock DB ──
+  const refreshState = () => {
+    setIngredients(mockDB.getIngredients());
+    setMaterials(mockDB.getMaterials());
+    setRecipes(mockDB.getRecipes());
+    setProductionLogs(mockDB.getProductionLogs());
+    setWasteLogs(mockDB.getWasteLogs());
+    setProducts(mockDB.getProducts());
+  };
+
+  // ── Network Fetch Loaders ──
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      const [ing, mat, rec, prodLog, wst, prd] = await Promise.all([
+        fetch(`${BASE_URL}/ingredients`).then(r => r.json()),
+        fetch(`${BASE_URL}/materials`).then(r => r.json()),
+        fetch(`${BASE_URL}/recipes`).then(r => r.json()),
+        fetch(`${BASE_URL}/production-logs`).then(r => r.json()),
+        fetch(`${BASE_URL}/waste`).then(r => r.json()),
+        fetch(`${BASE_URL}/products`).then(r => r.json())
+      ]);
+
+      setIngredients(ing.data || []);
+      setMaterials(mat.data || []);
+      setRecipes(rec.data || []);
+      setProductionLogs(prodLog.data || []);
+      setWasteLogs(wst.data || []);
+      setProducts(prd.data || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchOrders = async () => {};
 
-  // ── No-op actions (papalitan ng totoong service calls) ────
+  // ── Product actions ────
   const addProduct         = async () => {};
-  const updateProduct      = async () => {};
+  const updateProduct      = async (id, data) => { mockDB.updateProduct(id, data); refreshState(); };
   const deleteProduct      = async () => {};
   const uploadProductImage = async () => {};
 
+  // ── Order actions ────
   const addOrder         = async () => {};
   const addOnlineOrder   = async () => {};
   const updateOrderStatus = async () => {};
 
-  const addIngredient    = async () => {};
-  const updateIngredient = async () => {};
-  const deleteIngredient = async () => {};
+  // ── Ingredient actions ────
+  const addIngredient = async (data) => {
+    await fetch(`${BASE_URL}/ingredients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    refreshState();
+  };
+  const updateIngredient = async (id, data) => {
+    await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    refreshState();
+  };
+  const deleteIngredient = async (id) => {
+    await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'DELETE' });
+    refreshState();
+  };
 
-  const addMaterial    = async () => {};
-  const updateMaterial = async () => {};
-  const deleteMaterial = async () => {};
+  // ── Material actions ────
+  const addMaterial = async (data) => {
+    await fetch(`${BASE_URL}/materials`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    refreshState();
+  };
+  const updateMaterial = async (id, data) => {
+    await fetch(`${BASE_URL}/materials/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    refreshState();
+  };
+  const deleteMaterial = async (id) => {
+    await fetch(`${BASE_URL}/materials/${id}`, { method: 'DELETE' });
+    refreshState();
+  };
 
-  const addRecipe    = async () => {};
-  const updateRecipe = async () => {};
-  const deleteRecipe = async () => {};
+  // ── Recipe actions ────
+  const addRecipe = async (data) => {
+    await fetch(`${BASE_URL}/recipes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    refreshState();
+  };
+  const updateRecipe = async (id, data) => {
+    await fetch(`${BASE_URL}/recipes/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    refreshState();
+  };
+  const deleteRecipe = async (id) => {
+    await fetch(`${BASE_URL}/recipes/${id}`, { method: 'DELETE' });
+    refreshState();
+  };
 
-  const confirmBatch = async () => {};
-  const logWaste      = async () => {};
+  // ── Batch production ────
+  const confirmBatch = async (recipeId, goalNum) => {
+    await fetch(`${BASE_URL}/recipes/${recipeId}/confirm-batch`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ goalNum }) });
+    refreshState();
+  };
+
+  // ── Waste ────
+  const logWaste = async (data) => {
+    await fetch(`${BASE_URL}/waste`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    refreshState();
+  };
+  
+  const deleteWasteLog = async (id) => {
+    await fetch(`${BASE_URL}/waste/${id}`, { method: 'DELETE' });
+    refreshState();
+  };
 
   const value = {
     // ── Data
@@ -70,7 +153,7 @@ export function AppProvider({ children }) {
     // ── Batch production
     confirmBatch,
     // ── Waste
-    logWaste,
+    logWaste, deleteWasteLog,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
