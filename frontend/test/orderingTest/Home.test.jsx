@@ -42,8 +42,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, it, expect } from "vitest";
-// Pointing back up out of the 'test' folder and into 'src/components'
-import Home from "../src/pages/Home"; 
+import Home from "../../src/pages/orderingPage/Home";
 
 describe("Home Component", () => {
 

@@ -1,6 +1,7 @@
 // ============================================================
 // REUSABLE UI COMPONENTS — Aileen & Niculus POS
 // ============================================================
+/* eslint-disable react-refresh/only-export-components */
 import { useState, createContext, useContext } from 'react';
 import { createPortal } from 'react-dom'; // Dinagdag para sa Portal fix[cite: 13]
 import { X, Search, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
@@ -235,13 +236,9 @@ export function ToastProvider({ children }) {
 }
 
 export const useToast = () => {
-  return {
-    toast: () => {},
-    success: () => {},
-    error: () => {},
-    warning: () => {},
-    info: () => {}
-  };
+  const context = useContext(ToastContext);
+  if (!context) throw new Error('useToast must be used within a ToastProvider');
+  return context;
 };
 
 // ─── Confirm Modal (UPDATED WITH PORTAL FIX) ──────────────────

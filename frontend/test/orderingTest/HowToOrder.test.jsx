@@ -36,9 +36,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
-// Double check this path! 
-// If your file layout is flat, try "../src/components/HowToOrder"
-import HowToOrder from "../src/components/HowToOrder"; 
+import HowToOrder from "../../src/components/orderingComponents/HowToOrder";
 
 describe("HowToOrder Component", () => {
 
