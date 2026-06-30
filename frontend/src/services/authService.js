@@ -21,8 +21,6 @@ export async function login(email, password) {
       }, 800);
     });
   }
-
-  // --- TOTOONG BACKEND CONNECTION ---
   const res = await fetch(`${API_BASE}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
