@@ -23,10 +23,3 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
-
-
-# Harangan ang lahat ng package-lock.json kahit saang subfolder pa
-package-lock.json
-**/package-lock.json
-yarn.lock
-pnpm-lock.yaml
