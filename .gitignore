@@ -1,0 +1,88 @@
+# ==========================================
+# ROOT-LEVEL BLOCKERS (THE "ANTI-BOBO" GUARD)
+# ==========================================
+# Haharangan nito kahit anong aksidenteng package files o node_modules sa root
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ==========================================
+# SENSITIVE DATA & API KEYS (CRITICAL)
+# ==========================================
+# Kahit saang subfolder mag-iwan ng .env, hindi makakalusot sa GitHub
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+*.env
+config.json
+/frontend/.env
+/Backend/.env
+
+# ==========================================
+# DEPENDENCY DIRECTORIES (SUBFOLDERS)
+# ==========================================
+# Segurista backup para sa loob ng Backend at frontend
+**/node_modules/
+node_modules/
+Backend/node_modules/
+frontend/node_modules/
+
+# ==========================================
+# PRODUCTION BUILDS & OUTPUTS
+# ==========================================
+# Para kung sakaling mag-build sila local, hindi mapupuno ng libu-libong static files ang repo
+dist/
+build/
+out/
+.next/
+.nuxt/
+bin/
+obj/
+html/
+**/dist/
+**/build/
+
+# ==========================================
+# TESTING & COVERAGE REPORTS
+# ==========================================
+# Harang ang mga auto-generated files ng Vitest/Jest at coverage charts
+coverage/
+*.lcov
+.vitest/
+.vitest-cache/
+.jest/
+.npm/
+.eslintcache
+
+# ==========================================
+# LOGS & TEMPORARY FILES
+# ==========================================
+# Para sa mga npm logs na lumalabas kapag nagka-error sila sa install/run
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# ==========================================
+# IDEs, EDITORS, & SYSTEM FILES
+# ==========================================
+# Mga settings ng VS Code o Mac/Windows files na hindi naman kailangan sa repo
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
