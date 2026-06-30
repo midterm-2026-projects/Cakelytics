@@ -43,7 +43,7 @@ export default function POSPage() {
         <div className="flex items-center gap-4 mb-6 text-[#9b665b] uppercase font-black text-[13px] tracking-[0.12em]">
           <span>{activeCategory}</span>
 
-          <div className="flex-1 h-[1px] bg-[#ead6d0]" />
+          <div className="flex-1 h-[px] bg-[#ead6d0]" />
 
           <small className="text-[#c48479] font-medium">
             {filteredProducts.length} items
