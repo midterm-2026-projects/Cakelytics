@@ -3,10 +3,11 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import HeaderPOS from '../../src/components/POScomponents/HeaderPOS';
 
 describe('HeaderPOS', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-08-15T14:35:00Z'));
-  });
+beforeEach(() => {
+  vi.useFakeTimers();
+  // Set time to 10:35 PM local time (22:35 in 24-hour format)
+  vi.setSystemTime(new Date('2025-08-15T22:35:00Z'));
+});
 
   afterEach(() => {
     vi.useRealTimers();
