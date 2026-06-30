@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import POSPage from './pages/POSPage';
 import Home from './pages/orderingPage/Home';
 import Menu from './pages/orderingPage/Menu';
 import { getToken, clearToken } from './services/api';
 import * as authService from './services/authService';
 import { AppProvider } from './context/AppContext';
 import { Layout } from './components/Sidebar';
+
+
 
 // import Navbar from "./customerComponents/Navbar";
 // import HowToOrder from "./customerComponents/HowToOrder";
@@ -79,7 +82,7 @@ export default function App() {
           <Route path="/performanceTimeframe" element={<div className="p-6 bg-stone-50 min-h-screen"><PerformanceTimeframe /></div>} />
           <Route path="/four-kpi" element={<div className="p-6 bg-stone-50 min-h-screen"><FourKpi /></div>} />
           <Route path="/stackedBar" element={<div className="p-6 bg-stone-50 min-h-screen"><StackedBar /></div>} />
-
+           <Route path="/pos" element={<POSPage />} />
         </>
         )}
 

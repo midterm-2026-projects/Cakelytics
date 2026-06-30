@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, vi, expect } from 'vitest';
-import SearchBar from '../src/components/SearchBar'; // Adjust the path as needed
+import SearchBar from '../../src/components/POScomponents/SearchBar'; // Adjust the path as needed
 import '@testing-library/jest-dom';
 
 describe('SearchBar Component', () => {
