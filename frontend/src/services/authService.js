@@ -1,6 +1,6 @@
 import { setToken, clearToken } from './api';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/auth';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 export async function login(email, password) {
   // --- MOCK SIMULATION PARA SA BROWSER (KAPAG WALANG BACKEND) ---
@@ -18,7 +18,7 @@ export async function login(email, password) {
         } else {
           reject(new Error('Invalid email or password'));
         }
-      }, 800); // 800ms delay para maramdaman mo yung loading state
+      }, 800);
     });
   }
 
