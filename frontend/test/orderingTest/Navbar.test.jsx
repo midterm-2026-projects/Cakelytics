@@ -36,8 +36,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, it, expect } from "vitest";
-// Adjust this path if your files are inside src/pages instead of src/components
-import Navbar from "../src/components/Navbar"; 
+import Navbar from "../../src/components/orderingComponents/Navbar"; 
 
 describe("Navbar Component", () => {
 

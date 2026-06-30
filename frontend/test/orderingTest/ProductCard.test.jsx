@@ -41,7 +41,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 // Adjust this path if your file layout differs
-import ProductCard from "../src/components/ProductCard"; 
+import ProductCard from "../../src/components/orderingComponents/ProductCard"; 
 
 describe("ProductCard Component", () => {
   // Mock product data for standard available item

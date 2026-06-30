@@ -6,6 +6,7 @@
 // kailangan galawin ang AppLayout.jsx o ibang components na gumagamit
 // ng useApp().
 
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from 'react';
 import { mockDB } from '../data/mockDatabase'; // I-import ang localized in-memory database file
 
@@ -20,7 +21,7 @@ export function AppProvider({ children }) {
   const [productionLogs, setProductionLogs] = useState(() => mockDB.getProductionLogs());
   const [wasteLogs,      setWasteLogs]      = useState(() => mockDB.getWasteLogs());
   const [products,       setProducts]       = useState(() => mockDB.getProducts());
-  const [orders,         setOrders]         = useState([]);
+  const [orders]                          = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);

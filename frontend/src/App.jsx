@@ -1,17 +1,35 @@
 import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import POSPage from './pages/POSPage';
+import Home from './pages/orderingPage/Home';
+import Menu from './pages/orderingPage/Menu';
 import { getToken, clearToken } from './services/api';
 import * as authService from './services/authService';
 import { AppProvider } from './context/AppContext';
 import { Layout } from './components/Sidebar';
-import Navbar from "./components/Navbar";
-import HowToOrder from "./components/HowToOrder";
-import OrderProgress from "./components/OrderProgress";
-import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import Menu from "./pages/Menu";
+
+// import Navbar from "./customerComponents/Navbar";
+// import HowToOrder from "./customerComponents/HowToOrder";
+// import OrderProgress from "./customerComponents/OrderProgress";
+// import Footer from "./customerComponents/Footer";
+// import Home from "./customerPages/Home";
+// import Menu from "./customerPages/Menu";
+// import PastCreations from "./customerComponents/PastCreations";
+// import FeaturedCategories from "./customerComponents/FeaturedCategories";
+// import Cart from "./customerComponents/Cart";
+// import OrderCTA from "./customerComponents/OrderCTA";
+// import CategoryFilters from "./customerComponents/CategoryFilters";
+// import CartPage from "./customerPages/CartPage";
+
+import Navbar from "./components/orderingComponents/Navbar";
+import HowToOrder from "./components/orderingComponents/HowToOrder";
+import OrderProgress from "./components/orderingComponents/OrderProgress";
+import Footer from "./components/orderingComponents/Footer";
+import PastCreations from "./components/orderingComponents/PastCreations";
+import FeaturedCategories from "./components/orderingComponents/FeaturedCategories";
+import Cart from "./components/orderingComponents/Cart";
+import OrderCTA from "./components/orderingComponents/OrderCTA";
+import CategoryFilters from "./components/orderingComponents/CategoryFilters";
 
 import FourKpi from './pages/AnalyticsPage/fourKPI';
 import PerformanceTimeframe from './pages/AnalyticsPage/performanceTimeframe';
@@ -88,6 +106,12 @@ export default function App() {
                     <Route path="/home" element={<Home />} />
                     <Route path="/menu" element={<Menu />} />
                     <Route path="/how-to-order" element={<HowToOrder />} />
+                    <Route path="/past-creations" element={<PastCreations />} />
+                    <Route path="/featured-categories" element={<FeaturedCategories />} />
+                    {/* <Route path="/cart" element={<Cart />} /> */}
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/order-cta" element={<OrderCTA />} />
+                    <Route path="/categoryfilters" element={<CategoryFilters/>}/>
                     <Route path="/orderprogress" element={<OrderProgress currentStep={1} />} />
                   </Routes>
                 </main>

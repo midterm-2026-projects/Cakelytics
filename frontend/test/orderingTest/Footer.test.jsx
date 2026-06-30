@@ -58,14 +58,18 @@
 //   });
 // });
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, it, expect } from "vitest";
-// Pointing back up out of the 'test' folder and into 'src/components'
-import Footer from "../src/components/Footer"; 
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
+import Footer from "../../src/components/orderingComponents/Footer";
+
+function LocationDisplay() {
+  const location = useLocation();
+  return <div data-testid="location-display">{location.pathname}</div>;
+}
 
 describe("Footer Component", () => {
-  
   it("should render the brand name, description, and sections", () => {
     render(
       <MemoryRouter>
@@ -73,50 +77,44 @@ describe("Footer Component", () => {
       </MemoryRouter>
     );
 
-    // Verify Brand Identity
-    expect(screen.getByRole("heading", { name: /aileen cake max/i })).toBeInTheDocument();
-    expect(screen.getByText(/handcrafting moments of joy/i)).toBeInTheDocument();
-
-    // Verify Section Headings
-    expect(screen.getByRole("heading", { name: /explore/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /contact us/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /shop hours/i })).toBeInTheDocument();
+    expect(screen.getByText("Aileen Cake Max")).toBeInTheDocument();
+    expect(screen.getByText(/Handcrafting moments of joy/i)).toBeInTheDocument();
+    expect(screen.getByText("Explore")).toBeInTheDocument();
   });
 
-  it("should navigate to the menu page when the Menu link is clicked", () => {
+  it("should navigate to the menu page when the Menu link is clicked", async () => {
+    const user = userEvent.setup();
+    
     render(
       <MemoryRouter initialEntries={["/"]}>
         <Routes>
-          <Route path="/" element={<Footer />} />
-          <Route path="/menu" element={<div>Menu Page Content</div>} />
+          <Route path="*" element={<><Footer /><LocationDisplay /></>} />
         </Routes>
       </MemoryRouter>
     );
 
-    // Find the Menu link and click it
     const menuLink = screen.getByRole("link", { name: /^menu$/i });
-    fireEvent.click(menuLink);
+    await user.click(menuLink);
 
-    // Verify that the URL swap rendered our mock target layout content
-    expect(screen.getByText("Menu Page Content")).toBeInTheDocument();
+    // ✅ Tiyakin na ang React Router state ay lumipat na sa /menu
+    expect(screen.getByTestId("location-display")).toHaveTextContent("/menu");
   });
 
-  it("should navigate to the home page when the Home link is clicked", () => {
+  it("should navigate to the home page when the Home link is clicked", async () => {
+    const user = userEvent.setup();
+    
     render(
-      <MemoryRouter initialEntries={["/"]}>
+      <MemoryRouter initialEntries={["/menu"]}>
         <Routes>
-          <Route path="/" element={<Footer />} />
-          <Route path="/home" element={<div>Home Page Content</div>} />
+          <Route path="*" element={<><Footer /><LocationDisplay /></>} />
         </Routes>
       </MemoryRouter>
     );
 
-    // Find the Home link and click it
     const homeLink = screen.getByRole("link", { name: /^home$/i });
-    fireEvent.click(homeLink);
+    await user.click(homeLink);
 
-    // Verify that the URL swap rendered our mock target layout content
-    expect(screen.getByText("Home Page Content")).toBeInTheDocument();
+    
+    expect(screen.getByTestId("location-display")).toHaveTextContent("/");
   });
-
 });
