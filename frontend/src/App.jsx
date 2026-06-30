@@ -13,6 +13,10 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Menu from "./pages/Menu";
 
+import FourKpi from './pages/AnalyticsPage/fourKPI';
+import PerformanceTimeframe from './pages/AnalyticsPage/performanceTimeframe';
+import StackedBar from './pages/AnalyticsPage/stackedBar';
+
 export default function App() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!getToken());
@@ -39,18 +43,26 @@ export default function App() {
           }
         />
         {isIsolated && (
-          <Route
-            path="/admin-ui"
-            element={
-              <Layout onLogout={handleLogout}>
-                <div className="p-4">
-                  <h2 className="text-lg font-bold text-brand-800">Layout Preview</h2>
-                  <p className="text-sm text-brand-500 mt-1">
-                  </p>
-                </div>
-              </Layout>
-            }
-          />
+          <>
+            {/* 1. Layout Preview ng Kaklase Mo */}
+            <Route
+              path="/admin-ui"
+              element={
+                <Layout onLogout={handleLogout}>
+                  <div className="p-4">
+                    <h2 className="text-lg font-bold text-brand-800">Layout Preview</h2>
+                  </div>
+                </Layout>
+              }
+            />
+
+
+          {/* Independent Routes for Week 2 - Day 1 AI-Driven Analytics Dashboard */}
+          <Route path="/performanceTimeframe" element={<div className="p-6 bg-stone-50 min-h-screen"><PerformanceTimeframe /></div>} />
+          <Route path="/four-kpi" element={<div className="p-6 bg-stone-50 min-h-screen"><FourKpi /></div>} />
+          <Route path="/stackedBar" element={<div className="p-6 bg-stone-50 min-h-screen"><StackedBar /></div>} />
+
+        </>
         )}
 
         {/* 3. CUSTOMER PAGES ONLY (Dito lang lilitaw ang Navbar at Footer) */}
