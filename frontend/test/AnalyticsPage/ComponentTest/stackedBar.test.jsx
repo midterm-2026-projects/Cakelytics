@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import StackedBar from '../../../src/pages/AnalyticsPage/stackedBar';
+import StackedBar from '../../../src/components/Analytics/stackedBar';
 
 // ─── Mock data ───────────────────────────────────────────────────────
 const mockTrend = {

@@ -34,9 +34,12 @@ import Cart from "./components/orderingComponents/Cart";
 import OrderCTA from "./components/orderingComponents/OrderCTA";
 import CategoryFilters from "./components/orderingComponents/CategoryFilters";
 
-import FourKpi from './pages/AnalyticsPage/fourKPI';
-import PerformanceTimeframe from './pages/AnalyticsPage/performanceTimeframe';
-import StackedBar from './pages/AnalyticsPage/stackedBar';
+import FourKpi from './components/Analytics/fourKPI';
+import PerformanceTimeframe from './components/Analytics/performanceTimeframe';
+import StackedBar from './components/Analytics/stackedBar';
+
+import OrderVolumeHeatmap from './components/Analytics/heatmap';
+import TopProductsList from './components/Analytics/topProducts';
 
 export default function App() {
 
@@ -82,6 +85,8 @@ export default function App() {
           <Route path="/performanceTimeframe" element={<div className="p-6 bg-stone-50 min-h-screen"><PerformanceTimeframe /></div>} />
           <Route path="/four-kpi" element={<div className="p-6 bg-stone-50 min-h-screen"><FourKpi /></div>} />
           <Route path="/stackedBar" element={<div className="p-6 bg-stone-50 min-h-screen"><StackedBar /></div>} />
+          <Route path="/heatmap" element={<div className="p-6 bg-stone-50 min-h-screen"><OrderVolumeHeatmap /></div>} />
+          <Route path="/topproducts" element={<div className="p-6 bg-stone-50 min-h-screen"><TopProductsList /></div>} />
            <Route path="/pos" element={<POSPage />} />
         </>
         )}

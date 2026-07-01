@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import FourKpi from '../../../src/pages/AnalyticsPage/fourKPI';
+import FourKpi from '../../../src/components/Analytics/fourKPI';
 
 describe('FourKpi Component', () => {
   const mockKpiData = {
