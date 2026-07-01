@@ -1,28 +1,13 @@
 import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import POSPage from './pages/POSPage';
+import POSPage from './pages/PosPage/POSPage';
 import Home from './pages/orderingPage/Home';
 import Menu from './pages/orderingPage/Menu';
 import { getToken, clearToken } from './services/api';
 import * as authService from './services/authService';
 import { AppProvider } from './context/AppContext';
 import { Layout } from './components/Sidebar';
-
-
-
-// import Navbar from "./customerComponents/Navbar";
-// import HowToOrder from "./customerComponents/HowToOrder";
-// import OrderProgress from "./customerComponents/OrderProgress";
-// import Footer from "./customerComponents/Footer";
-// import Home from "./customerPages/Home";
-// import Menu from "./customerPages/Menu";
-// import PastCreations from "./customerComponents/PastCreations";
-// import FeaturedCategories from "./customerComponents/FeaturedCategories";
-// import Cart from "./customerComponents/Cart";
-// import OrderCTA from "./customerComponents/OrderCTA";
-// import CategoryFilters from "./customerComponents/CategoryFilters";
-// import CartPage from "./customerPages/CartPage";
 
 import Navbar from "./components/orderingComponents/Navbar";
 import HowToOrder from "./components/orderingComponents/HowToOrder";
@@ -40,6 +25,8 @@ import StackedBar from './components/Analytics/stackedBar';
 
 import OrderVolumeHeatmap from './components/Analytics/heatmap';
 import TopProductsList from './components/Analytics/topProducts';
+
+import AllOrdersPage from './pages/AllOrdersPage/AllOrdersPage';
 
 export default function App() {
 
@@ -87,7 +74,8 @@ export default function App() {
           <Route path="/stackedBar" element={<div className="p-6 bg-stone-50 min-h-screen"><StackedBar /></div>} />
           <Route path="/heatmap" element={<div className="p-6 bg-stone-50 min-h-screen"><OrderVolumeHeatmap /></div>} />
           <Route path="/topproducts" element={<div className="p-6 bg-stone-50 min-h-screen"><TopProductsList /></div>} />
-           <Route path="/pos" element={<POSPage />} />
+          <Route path="/pos" element={<POSPage />} />
+          <Route path="/all-orders" element={<AllOrdersPage />} />
         </>
         )}
 
