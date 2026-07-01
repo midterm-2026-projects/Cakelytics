@@ -1,0 +1,3 @@
+{
+  "vitest.configSearchPattern": "{Backend,frontend}/vite*.config.{js,ts}"
+}
