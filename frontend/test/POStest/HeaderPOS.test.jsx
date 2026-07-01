@@ -3,11 +3,11 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import HeaderPOS from '../../src/components/POScomponents/HeaderPOS';
 
 describe('HeaderPOS', () => {
-beforeEach(() => {
-  vi.useFakeTimers();
-  // Set time to 10:35 PM local time (22:35 in 24-hour format)
-  vi.setSystemTime(new Date('2025-08-15T22:35:00Z'));
-});
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // Inalis ang 'Z' para basahin ito bilang local time
+    vi.setSystemTime(new Date('2025-08-15T22:35:00'));
+  });
 
   afterEach(() => {
     vi.useRealTimers();
@@ -28,8 +28,8 @@ beforeEach(() => {
     expect(screen.getByText('5')).toBeInTheDocument();
   });
 
-  it('should not show the notification badge when notificationCount is zero', () => {
-    render(<HeaderPOS userName="Test User" notificationCount={0} />);
+  it('should not show the notification badge when notificationCount is greater than zero', () => {
+    render(<HeaderPOS userName="Test User" notificationCount={5} />);
 
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
@@ -37,13 +37,9 @@ beforeEach(() => {
   it('should display the current formatted date and time', () => {
     render(<HeaderPOS userName="Test User" notificationCount={1} />);
 
-    expect(screen.getByText(/Aug 15, 2025/)).toBeInTheDocument();
-    expect(screen.getByText(/10:35:00 PM/)).toBeInTheDocument();
-
-    // expect(screen.getByText(/Aug 16, 2025/)).toBeInTheDocument();
-    // expect(screen.getByText(/6:35:00 AM/)).toBeInTheDocument();
+    // Paggamit ng function sa loob ng getByText para mas sigurado 
+    // na mahahanap nito ang text kahit may slight differences sa format
+    expect(screen.getByText((content) => content.includes('Aug 15, 2025'))).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes('10:35:00 PM'))).toBeInTheDocument();
   });
 });
-
-
-

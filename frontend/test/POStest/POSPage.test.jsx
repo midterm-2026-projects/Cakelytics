@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import POSPage from '../../src/pages/POSPage';
+import POSPage from '../../src/pages/PosPage/POSPage';
 
 describe('POSPage', () => {
   afterEach(() => {

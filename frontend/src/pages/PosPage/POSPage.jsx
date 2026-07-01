@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 
-import SearchBar from "../components/POScomponents/SearchBar";
-import CategoryFilters from "../components/POScomponents/CategoryFilter";
-import ProductCard from "../components/POScomponents/ProductCards";
-import OrderSidebar from "../components/POScomponents/OrderSidebar";
+import SearchBar from "../../components/POScomponents/SearchBar";
+import CategoryFilters from "../../components/POScomponents/CategoryFilter";
+import ProductCard from "../../components/POScomponents/ProductCards";
+import OrderSidebar from "../../components/POScomponents/OrderSidebar";
 
-import { products } from "../data/products";
+import { products } from "../../data/products";
 
 export default function POSPage() {
   const [searchTerm, setSearchTerm] = useState("");
