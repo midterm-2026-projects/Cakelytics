@@ -19,6 +19,11 @@ import Cart from "./components/orderingComponents/Cart";
 import OrderCTA from "./components/orderingComponents/OrderCTA";
 import CategoryFilters from "./components/orderingComponents/CategoryFilters";
 
+import Checkout from './pages/orderingPage/Checkout';
+import Complete from './pages/orderingPage/Complete';
+import Payment from './pages/orderingPage/Payment';
+import Receipt from './pages/orderingPage/Receipt';
+
 import FourKpi from './components/Analytics/fourKPI';
 import PerformanceTimeframe from './components/Analytics/performanceTimeframe';
 import StackedBar from './components/Analytics/stackedBar';
@@ -99,7 +104,7 @@ export default function App() {
                 {/* Dito nagpapalit-palit ang views ng Customer */}
                 <main className="flex-grow">
                   <Routes>
-                    <Route path="/home" element={<Home />} />
+                    <Route path="/" element={<Home />} />
                     <Route path="/menu" element={<Menu />} />
                     <Route path="/how-to-order" element={<HowToOrder />} />
                     <Route path="/past-creations" element={<PastCreations />} />
@@ -108,6 +113,10 @@ export default function App() {
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/order-cta" element={<OrderCTA />} />
                     <Route path="/categoryfilters" element={<CategoryFilters/>}/>
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/complete" element={<Complete />} />
+                    <Route path="/payment" element={<Payment />} />
+                    <Route path="/receipt" element={<Receipt />} />
                     <Route path="/orderprogress" element={<OrderProgress currentStep={1} />} />
                   </Routes>
                 </main>

@@ -45,7 +45,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-      <Link to="/home" className="hover:text-[#D8B89A] transition">
+      <Link to="/" className="hover:text-[#D8B89A] transition">
         Home
       </Link>
     </li>
