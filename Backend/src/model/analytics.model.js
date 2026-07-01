@@ -5,5 +5,15 @@ export default {
 
   async getStackedBarByTimeframe(timeframe){
 
-  }
+  },
+
+  async getOrderVolumeByTimeframe(timeframe){
+
+  },
+
+  async getTopProductsByTimeframe(timeframe){
+
+  },
+
+  
 }

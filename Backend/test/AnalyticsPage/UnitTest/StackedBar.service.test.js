@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import StackedBarServices from "../../../src/services/AnalyticsPage/StackedBar.services";
+import StackedBarServices from "../../../src/services/AnalyticsPage/StackedBar.service";
 import analyticsModel from "../../../src/model/analytics.model";
 
 

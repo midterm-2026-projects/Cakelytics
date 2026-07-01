@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import FourKpiService from "../../../src/services/AnalyticsPage/FourKPI.services.js";
-import analyticsModel from "../../../src/model/analytics.model";
+import FourKpiService from "../../../src/services/AnalyticsPage/FourKPI.service.js";
+import analyticsModel from "../../../src/model/analytics.model.js";
 
 
 vi.mock("../../../src/model/analytics.model", () => ({
