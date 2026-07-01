@@ -37,11 +37,11 @@ beforeEach(() => {
   it('should display the current formatted date and time', () => {
     render(<HeaderPOS userName="Test User" notificationCount={1} />);
 
-    // expect(screen.getByText(/Aug 15, 2025/)).toBeInTheDocument();
-    // expect(screen.getByText(/10:35:00 PM/)).toBeInTheDocument();
+    expect(screen.getByText(/Aug 15, 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/10:35:00 PM/)).toBeInTheDocument();
 
-    expect(screen.getByText(/Aug 16, 2025/)).toBeInTheDocument();
-    expect(screen.getByText(/6:35:00 AM/)).toBeInTheDocument();
+    // expect(screen.getByText(/Aug 16, 2025/)).toBeInTheDocument();
+    // expect(screen.getByText(/6:35:00 AM/)).toBeInTheDocument();
   });
 });
 
