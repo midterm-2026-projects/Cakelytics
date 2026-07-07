@@ -8,7 +8,6 @@ class AppError extends Error {
 function errorHandler(err, _req, res, _next) {
   console.error('[ERROR]', err.message || err);
 
-  // Zod validation errors
   if (err.name === 'ZodError') {
     return res.status(422).json({
       success: false,
