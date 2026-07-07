@@ -1,22 +1,17 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+let supabase = null;
+
+// Hindi na tayo magt-throw ng error dito!
+// Imbes na mag-crash, i-che-check muna natin kung may laman ang .env
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey);
+} else {
+  console.warn("BABALA: Walang nakitang Supabase credentials. Naka-null ang database config.");
 }
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
-
-// Debug log — pwede mong tanggalin to pag production na
-console.log('--- SUPABASE CONFIG CHECK ---');
-console.log('URL:', process.env.SUPABASE_URL);
-console.log('KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'May laman yung Key!' : 'UNDEFINED / WALANG LAMAN');
-console.log('-----------------------------');
-
 module.exports = { supabase };
-
-
