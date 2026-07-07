@@ -2,11 +2,10 @@ require('dotenv').config();
 const request = require('supertest');
 const express = require('express');
 
-// MOCK: Humarang bago pa i-load ang app para hindi tumawag sa totoong database
+// MOCK: I-fake natin ang Model para hindi gumamit ng Database ang API
 vi.mock('../../../src/model/auth.model.js', () => ({
   AuthModel: {
     signIn: vi.fn().mockImplementation(async (email, password) => {
-      // Kung tugma sa test credentials mo, papasok
       if (email === 'tinadepadua19@gmail.com' && password === 'Araymo.123') {
         return { data: { user: { id: 'u-1', email } }, error: null };
       }
@@ -27,7 +26,6 @@ app.use('/auth', authRoutes);
 app.use(errorHandler);
 
 describe('API testing', () => {
-
   describe('POST /auth/login', () => {
     it('should return 401 when logging in with invalid credentials', async () => {
       const res = await request(app)
@@ -85,5 +83,4 @@ describe('API testing', () => {
       expect(res.status).toBe(401);
     });
   });
-
 });

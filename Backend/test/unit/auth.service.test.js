@@ -1,3 +1,12 @@
+vi.mock('../../src/config/supabase.js', () => ({
+  supabase: {
+    auth: {
+      signInWithPassword: vi.fn(),
+      admin: { getUserById: vi.fn() }
+    }
+  }
+}));
+
 const { AuthModel } = require('../../src/model/auth.model.js');
 const { login, getProfile, verifyToken } = require('../../src/services/auth.service.js');
 
