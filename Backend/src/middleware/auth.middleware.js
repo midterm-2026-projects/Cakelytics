@@ -1,6 +1,6 @@
-const { verifyToken } = require('../services/auth.service');
+const jwt = require('jsonwebtoken');
 
-function authMiddleware(req, res, next) {
+function authMiddlewareJwt(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
 
@@ -8,13 +8,13 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ success: false, message: 'No token provided' });
   }
 
-  const session = verifyToken(token);
-  if (!session) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.admin = decoded;
+    next();
+  } catch (err) {
     return res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
-
-  req.admin = session; 
-  next();
 }
 
-module.exports = authMiddleware;
+module.exports = { authMiddlewareJwt };
