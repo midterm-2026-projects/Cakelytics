@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import StackedBarServices from "../../../src/services/AnalyticsPage/StackedBar.service";
-import analyticsModel from "../../../src/model/analytics.model";
+import StackedBarServices from "../../src/services/AnalyticsPage/StackedBar.service";
+import analyticsModel from "../../src/model/analytics.model";
 
 
-vi.mock("../../../src/model/analytics.model", () => ({
+vi.mock("../../src/model/analytics.model", () => ({
   default: {
     getStackedBarByTimeframe: vi.fn(),
   },

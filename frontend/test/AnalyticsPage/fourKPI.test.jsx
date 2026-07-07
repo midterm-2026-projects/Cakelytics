@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import FourKpi from '../../../src/components/Analytics/fourKPI';
+import FourKpi from '../../src/components/Analytics/fourKPI';
 
 describe('FourKpi Component', () => {
   it('should display correctly formatted currency and percentage values based on period', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import HeatmapTimeframe from '../../../src/components/Analytics/heatmapTimeframe';
+import HeatmapTimeframe from '../../src/components/Analytics/heatmapTimeframe';
 
 describe('HeatmapTimeframe (Timeframe Selector)', () => {
   it('should open the calendar dialog when the trigger button is clicked', () => {

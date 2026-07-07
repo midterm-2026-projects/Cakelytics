@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import OrderVolumeHeatmap from '../../../src/components/Analytics/heatmap';
+import OrderVolumeHeatmap from '../../src/components/Analytics/heatmap';
 
 describe('Order Volume Heatmap', () => {
   it('should render the empty state message when no data is provided', () => {

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import topProductsService from '../../../src/services/AnalyticsPage/TopProducts.service.js';
-import analyticsModel from '../../../src/model/analytics.model.js';
+import topProductsService from '../../src/services/AnalyticsPage/TopProducts.service.js';
+import analyticsModel from '../../src/model/analytics.model.js';
 
 // I-mock natin yung analytics model
-vi.mock('../../../src/model/analytics.model.js', () => ({
+vi.mock('../../src/model/analytics.model.js', () => ({
   default: {
     getTopProductsByTimeframe: vi.fn(),
   },

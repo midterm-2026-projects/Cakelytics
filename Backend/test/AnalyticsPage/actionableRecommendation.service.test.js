@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import actionableRecommendationService from '../../../src/services/AnalyticsPage/actionableRecommendation.service.js';
-import analyticsModel from '../../../src/model/analytics.model.js';
+import actionableRecommendationService from '../../src/services/AnalyticsPage/actionableRecommendation.service.js';
+import analyticsModel from '../../src/model/analytics.model.js';
 
-vi.mock('../../../src/model/analytics.model.js', () => ({
+vi.mock('../../src/model/analytics.model.js', () => ({
   default: { getActionableRecommendations: vi.fn() },
 }));
 

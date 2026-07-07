@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import heatmapService from "../../../src/services/AnalyticsPage/Heatmap.service";
-import analyticsModel from "../../../src/model/analytics.model";
+import heatmapService from "../../src/services/AnalyticsPage/Heatmap.service";
+import analyticsModel from "../../src/model/analytics.model";
 
-vi.mock("../../../src/model/analytics.model");
+vi.mock("../../src/model/analytics.model");
 
 describe("Heatmap Service - getOrderVolumeByTimeframe", () => {
 

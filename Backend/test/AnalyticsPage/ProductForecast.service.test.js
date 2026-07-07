@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import productForecastService from '../../../src/services/AnalyticsPage/ProductForecast.service.js';
-import analyticsModel from '../../../src/model/analytics.model.js';
+import productForecastService from '../../src/services/AnalyticsPage/ProductForecast.service.js';
+import analyticsModel from '../../src/model/analytics.model.js';
 
-vi.mock('../../../src/model/analytics.model.js', () => ({
+vi.mock('../../src/model/analytics.model.js', () => ({
   default: { getProductForecasts: vi.fn() },
 }));
 

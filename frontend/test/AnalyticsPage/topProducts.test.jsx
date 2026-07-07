@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import TopProductsList from '../../../src/components/Analytics/topProducts';
+import TopProductsList from '../../src/components/Analytics/topProducts';
 
 describe('TopProductsList', () => {
   it('should display only the top 5 products', () => {
