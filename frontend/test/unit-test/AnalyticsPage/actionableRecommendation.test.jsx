@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ActionableRecommendation from '../../src/components/Analytics/actionableRecommendation';
+import ActionableRecommendation from '../../../src/components/Analytics/actionableRecommendation';
 
 describe('ActionableRecommendation Component', () => {
   it('should render the list of recommendations correctly given valid recommendation data.', () => {

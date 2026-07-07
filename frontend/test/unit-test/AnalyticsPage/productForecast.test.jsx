@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ProductForecasting from '../../src/components/Analytics/productForecast';
+import ProductForecasting from '../../../src/components/Analytics/productForecast';
 
 describe('ProductForecasting Component', () => {
   it('should render the list/chart of forecasted products correctly given valid input data.', () => {

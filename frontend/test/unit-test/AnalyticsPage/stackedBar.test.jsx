@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import StackedBar from '../../src/components/Analytics/stackedBar';
+import StackedBar from '../../../src/components/Analytics/stackedBar';
 
 // ─── Mock data ───────────────────────────────────────────────────────
 // Inayos ang format para maging Array of Objects (ito ang hinihingi ng Recharts)

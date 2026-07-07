@@ -1,6 +1,6 @@
 import { describe, it,} from 'vitest';
 import { render } from '@testing-library/react';
-import SalesForecast from '../../src/components/Analytics/salesForecast';
+import SalesForecast from '../../../src/components/Analytics/salesForecast';
 
 describe('SalesForecast Component', () => {
   it('should render the chart correctly given valid sales forecast data.', () => {

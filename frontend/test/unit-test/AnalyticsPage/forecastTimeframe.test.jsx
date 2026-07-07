@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ForecastTimeframe from '../../src/components/Analytics/forecastTimeframe';
+import ForecastTimeframe from '../../../src/components/Analytics/forecastTimeframe';
 
 describe('ForecastTimeframe Component', () => {
   it('should render the three timeframe options (7 days, 30 days, 60 days)', () => {
