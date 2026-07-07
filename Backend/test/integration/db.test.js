@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-// MOCK: I-fake ang supabase para pumasa sa GitHub Actions kahit walang .env
+// Haharangin natin ang supabase config at papalitan ng fake "success"
 vi.mock('../../src/config/supabase.js', () => ({
   supabase: {
     auth: {
