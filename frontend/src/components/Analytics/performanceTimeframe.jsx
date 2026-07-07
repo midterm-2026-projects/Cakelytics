@@ -50,7 +50,7 @@ export default function PerformanceTimeframe({ value, onChange, options = VIEWS 
   };
 
   return (
-    <div className="flex items-center gap-4 pl-6 md:pl-10">
+    <div className="flex items-center gap-4">
       <div className="relative" ref={containerRef}>
         <button
           onClick={() => {
@@ -67,7 +67,7 @@ export default function PerformanceTimeframe({ value, onChange, options = VIEWS 
         </button>
 
         {open && (
-          <div className="absolute z-10 top-full left-0 mt-2 w-full min-w-[200px] bg-white border border-brand-300 rounded-lg shadow-sm overflow-hidden">
+          <div className="absolute z-10 top-full right-0 mt-2 w-full min-w-[200px] bg-white border border-brand-300 rounded-lg shadow-sm overflow-hidden">
             {!showCustom ? (
               <ul className="py-1">
                 {options.map((v) => (

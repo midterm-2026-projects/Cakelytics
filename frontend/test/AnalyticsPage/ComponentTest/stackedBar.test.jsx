@@ -3,11 +3,12 @@ import { render, screen } from '@testing-library/react';
 import StackedBar from '../../../src/components/Analytics/stackedBar';
 
 // ─── Mock data ───────────────────────────────────────────────────────
-const mockTrend = {
-  labels: ['Mon', 'Tue', 'Wed'],
-  sales: [20000, 22000, 12000],
-  expenses: [12000, 13000, 7000],
-};
+// Inayos ang format para maging Array of Objects (ito ang hinihingi ng Recharts)
+const mockTrend = [
+  { label: 'Mon', Sales: 20000, Expenses: 12000 },
+  { label: 'Tue', Sales: 22000, Expenses: 13000 },
+  { label: 'Wed', Sales: 12000, Expenses: 7000 },
+];
 
 describe('Performance Trend Bar Chart Component ', () => {
   
