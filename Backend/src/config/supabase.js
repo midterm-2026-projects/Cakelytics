@@ -1,4 +1,7 @@
+
 require('dotenv').config();
+// Idagdag mo ito sa taas:
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'fake-secret-for-testing';
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
