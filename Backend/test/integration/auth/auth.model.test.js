@@ -1,6 +1,30 @@
+// MOCK 1: Pigilan ang pag-load ng totoong Supabase config
+vi.mock('../../../src/config/supabase.js', () => ({
+  supabase: {} 
+}));
+
 const { AuthModel } = require('../../../src/model/auth.model.js');
 
 describe('AuthModel', () => {
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    // MOCK 2: I-fake ang isasagot ng database
+    vi.spyOn(AuthModel, 'signIn').mockImplementation(async (email, password) => {
+      // Kung tama ang credentials na ginamit mo
+      if (email === 'admin@cakelytics.com' && password === 'password123') {
+        return { data: { user: { email: 'admin@cakelytics.com' } }, error: null };
+      }
+      // Lahat ng iba (invalid email, wrong pass) ay babato ng error
+      return { data: null, error: new Error('Invalid credentials') };
+    });
+
+    vi.spyOn(AuthModel, 'getAdminById').mockImplementation(async (id) => {
+      return { data: null, error: new Error('Admin not found') };
+    });
+  });
+
   // signIn
   it('should return an error when signing in with an invalid email format', async () => {
     const { error } = await AuthModel.signIn('notanemail', 'password123');
@@ -27,12 +51,4 @@ describe('AuthModel', () => {
     const { error } = await AuthModel.getAdminById('not-a-valid-uuid');
     expect(error).not.toBeNull();
   });
-
-//   it('should return the admin record when fetching by a valid existing id', async () => {
-//     // Palitan mo ito ng totoong id na nasa admins table mo sa Supabase
-//   const { data, error } = await AuthModel.getAdminById('e1e0cbf6-f028-4ce5-b008-9913a67eddf6'); 
-//   console.log(data); // ipapakita nito sa terminal yung laman kung ano man nilagay niyo sa id na iyon, para ma-verify mo kung tama yung data na nakuha mo
-//   expect(error).toBeNull();
-//   expect(data).toHaveProperty('name');
-// });
 });

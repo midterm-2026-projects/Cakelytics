@@ -1,6 +1,23 @@
 require('dotenv').config();
 const request = require('supertest');
 const express = require('express');
+
+// MOCK: Humarang bago pa i-load ang app para hindi tumawag sa totoong database
+vi.mock('../../../src/model/auth.model.js', () => ({
+  AuthModel: {
+    signIn: vi.fn().mockImplementation(async (email, password) => {
+      // Kung tugma sa test credentials mo, papasok
+      if (email === 'tinadepadua19@gmail.com' && password === 'Araymo.123') {
+        return { data: { user: { id: 'u-1', email } }, error: null };
+      }
+      return { data: null, error: new Error('Invalid credentials') };
+    }),
+    getAdminById: vi.fn().mockImplementation(async () => {
+      return { data: { id: 'u-1', name: 'Admin' }, error: null };
+    })
+  }
+}));
+
 const authRoutes = require('../../../src/routes/auth.routes.js');
 const { errorHandler } = require('../../../src/middleware/errorHandler.js');
 
@@ -47,9 +64,7 @@ describe('API testing', () => {
     });
   });
 
-
   describe('POST /auth/logout', () => {
-    
     it('should return 200 when logging out with a valid token', async () => {
       const loginRes = await request(app)
         .post('/auth/login')
@@ -69,7 +84,6 @@ describe('API testing', () => {
       const res = await request(app).post('/auth/logout');
       expect(res.status).toBe(401);
     });
-    
   });
 
 });
