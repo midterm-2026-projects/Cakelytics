@@ -35,6 +35,9 @@ jobs:
         run: npm test
         env:
           NODE_ENV: test
+          # Ito yung nakuha natin sa kaklase mo! Kukunin natin sa GitHub Variables
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ vars.SUPABASE_ANON_KEY }}
 
 
   frontend-tests:

@@ -7,6 +7,7 @@ coverage/
 
 # Environment Variables - Mga maseselang files na may passwords/API keys ng Supabase
 .env
+*.env*
 
 
 # Operating System Logs - Mga basurang files na kusa nililikha ng Windows/Mac
