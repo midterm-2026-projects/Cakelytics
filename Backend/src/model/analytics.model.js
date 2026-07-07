@@ -15,5 +15,15 @@ export default {
 
   },
 
+  async getProductForecasts(timeframe){
+
+  },
+
+  async getSalesForecasts(timeframe){
+
+  },
   
+  async getActionableRecommendations(){
+
+  },
 }

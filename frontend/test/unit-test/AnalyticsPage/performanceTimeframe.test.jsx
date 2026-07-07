@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import PerformanceTimeframe, { VIEWS } from '../../../../src/components/Analytics/performanceTimeframe';
+import PerformanceTimeframe, { VIEWS } from '../../../src/components/Analytics/performanceTimeframe';
 
 describe('Performance Timeframe Selector', () => {
   it('should trigger timeframe change function with selected value', () => {

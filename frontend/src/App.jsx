@@ -30,6 +30,10 @@ import StackedBar from './components/Analytics/stackedBar';
 
 import OrderVolumeHeatmap from './components/Analytics/heatmap';
 import TopProductsList from './components/Analytics/topProducts';
+import ForecastTimeframe from './components/Analytics/forecastTimeframe'
+import SalesForecast from './components/Analytics/salesForecast'
+import ProductForecasting from './components/Analytics/productForecast'
+import ActionableRecommendation from './components/Analytics/actionableRecommendation'
 
 import AllOrdersPage from './pages/AllOrdersPage/AllOrdersPage';
 
@@ -79,6 +83,10 @@ export default function App() {
           <Route path="/stackedBar" element={<div className="p-6 bg-stone-50 min-h-screen"><StackedBar /></div>} />
           <Route path="/heatmap" element={<div className="p-6 bg-stone-50 min-h-screen"><OrderVolumeHeatmap /></div>} />
           <Route path="/topproducts" element={<div className="p-6 bg-stone-50 min-h-screen"><TopProductsList /></div>} />
+          <Route path="/forecastTimeframe" element={<div className="p-6 bg-stone-50 min-h-screen"><ForecastTimeframe /></div>} />
+          <Route path="/salesForecast" element={<div className="p-6 bg-stone-50 min-h-screen"><SalesForecast /></div>} />
+          <Route path="/productForecast" element={<div className="p-6 bg-stone-50 min-h-screen"><ProductForecasting /></div>} />
+          <Route path="/recommendation" element={<div className="p-6 bg-stone-50 min-h-screen"><ActionableRecommendation /></div>} />
           <Route path="/pos" element={<POSPage />} />
           <Route path="/all-orders" element={<AllOrdersPage />} />
         </>
