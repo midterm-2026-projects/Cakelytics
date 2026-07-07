@@ -1,27 +1,32 @@
-const authService = require('../services/auth.service');
-const { ok } = require('../utils/response');
+const { AuthService } = require('../services/auth.service.js');
+const { ok, fail } = require('../utils/response.js');
+const { LoginSchema } = require('../schemas/index.js');
 
 const AuthController = {
+
   login: async (req, res, next) => {
     try {
-      const { email, password } = req.body;
-      const result = await authService.login(email, password);
+      const body   = LoginSchema.parse(req.body);
+      const result = await AuthService.login(body.email, body.password);
       ok(res, result, 'Login successful');
     } catch (err) {
-      next(err);
-    }
+      if (err.message?.toLowerCase().includes('credential') || 
+          err.message?.toLowerCase().includes('password') || 
+          err.message?.toLowerCase().includes('invalid')) {
+        return res.status(401).json({ success: false, message: err.message });
+      }
+      next(err); }
   },
 
-  logout: async (req, res, next) => {
+  logout: (_req, res) => ok(res, null, 'Logged out'),
+
+  me: async (req, res, next) => {
     try {
-      const header = req.headers.authorization || '';
-      const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-      await authService.logout(token);
-      ok(res, null, 'Logged out');
-    } catch (err) {
-      next(err);
-    }
+      const admin = await AuthService.getProfile(req.admin.id);
+      ok(res, admin);
+    } catch (err) { next(err); }
   },
+
 };
 
-module.exports = AuthController;
+module.exports = { AuthController };

@@ -1,55 +1,40 @@
-const crypto = require('crypto');
-const { TABLES } = require('../config/db');
+const jwt = require('jsonwebtoken');
+const { AuthModel } = require('../model/auth.model.js');
 
-const activeSessions = new Map();
-
-const MOCK_CREDENTIALS = {
-  'admin@cakelytics.com': '1234',
-};
-
-function genToken() {
-  return crypto.randomBytes(24).toString('hex');
-}
-
-function login(email, password) {
-  if (!email || !password) {
-    const err = new Error('Email and password are required');
-    err.statusCode = 400;
-    throw err;
-  }
-
-  const storedPassword = MOCK_CREDENTIALS[email];
-  const admin = TABLES.admins.find((a) => a.email === email);
-
-  if (!storedPassword || !admin || storedPassword !== password) {
-    const err = new Error('Invalid credentials');
+async function login(email, password) {
+  const { data: authData, error: authError } = await AuthModel.signIn(email, password);
+  if (authError || !authData?.user) {
+    const err = new Error('Invalid email or password');
     err.statusCode = 401;
     throw err;
   }
 
-  const token = genToken();
-  activeSessions.set(token, {
-    adminId: admin.id,
-    email: admin.email,
-    issuedAt: Date.now(),
-  });
-
-  return {
-    token,
-    admin: { id: admin.id, name: admin.name, email: admin.email },
-  };
-}
-
-function logout(token) {
-  if (!token || !activeSessions.has(token)) {
-    return false;
+  const { data: admin, error: adminError } = await AuthModel.getAdminById(authData.user.id);
+  if (adminError || !admin) {
+    const err = new Error('Admin account not found');
+    err.statusCode = 403;
+    throw err;
   }
-  activeSessions.delete(token);
-  return true;
+
+  const token = jwt.sign(
+    { id: admin.id, email: admin.email, name: admin.name },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
+  );
+
+  return { token, admin };
 }
 
-function verifyToken(token) {
-  return activeSessions.get(token) || null;
+async function getProfile(adminId) {
+  const { data, error } = await AuthModel.getAdminById(adminId);
+  if (error || !data) {
+    const err = new Error('Admin not found');
+    err.statusCode = 404;
+    throw err;
+  }
+  return data;
 }
 
-module.exports = { login, logout, verifyToken };
+const AuthService = { login, getProfile };
+
+module.exports = { login, getProfile, AuthService };
