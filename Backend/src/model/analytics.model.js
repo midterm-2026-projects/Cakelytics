@@ -1,29 +1,32 @@
-export default {
-  async getKpiByTimeframe(timeframe){
+const analyticsModel = {
+  async getKpiByTimeframe(timeframe) {
 
   },
 
-  async getStackedBarByTimeframe(timeframe){
+  async getStackedBarByTimeframe(timeframe) {
 
   },
 
-  async getOrderVolumeByTimeframe(timeframe){
+  async getOrderVolumeByTimeframe(timeframe) {
 
   },
 
-  async getTopProductsByTimeframe(timeframe){
+  async getTopProductsByTimeframe(timeframe) {
 
   },
 
-  async getProductForecasts(timeframe){
+  async getProductForecasts(timeframe) {
 
   },
 
-  async getSalesForecasts(timeframe){
+  async getSalesForecasts(timeframe) {
 
   },
   
-  async getActionableRecommendations(){
+  async getActionableRecommendations() {
 
-  },
-}
+  }
+};
+
+
+module.exports = analyticsModel;

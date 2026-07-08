@@ -1,17 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import heatmapService from "../../../src/services/AnalyticsPage/Heatmap.service";
-import analyticsModel from "../../../src/model/analytics.model";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-vi.mock("../../../src/model/analytics.model");
+// INAYOS ANG PATH: Tatlong ../ na ngayon
+const heatmapService = require("../../../src/services/AnalyticsPage/Heatmap.service.js");
+const analyticsModel = require("../../../src/model/analytics.model.js");
 
 describe("Heatmap Service - getOrderVolumeByTimeframe", () => {
-
   const selectedWeekStart = "2023-10-16";
   
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
+  beforeEach(() => vi.clearAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   it("should return heatmap data when model fetch is successful", async () => {
     const mockData = [
@@ -19,7 +16,7 @@ describe("Heatmap Service - getOrderVolumeByTimeframe", () => {
       { day: "Monday", hour: 10, orderCount: 20 },
     ];
 
-    analyticsModel.getOrderVolumeByTimeframe.mockResolvedValue(mockData);
+    vi.spyOn(analyticsModel, 'getOrderVolumeByTimeframe').mockResolvedValue(mockData);
 
     const result = await heatmapService.getOrderVolumeByTimeframe(selectedWeekStart);
 
@@ -31,7 +28,7 @@ describe("Heatmap Service - getOrderVolumeByTimeframe", () => {
   it("should throw an error when model returns no data", async () => {
     const mockError = new Error("No order volume data found");
 
-    analyticsModel.getOrderVolumeByTimeframe.mockRejectedValue(mockError);
+    vi.spyOn(analyticsModel, 'getOrderVolumeByTimeframe').mockRejectedValue(mockError);
 
     await expect(
       heatmapService.getOrderVolumeByTimeframe(selectedWeekStart)
