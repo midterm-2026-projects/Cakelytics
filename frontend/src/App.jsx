@@ -280,7 +280,7 @@ import { Layout } from './components/Sidebar';
 import Navbar from "./components/orderingComponents/Navbar";
 import HowToOrder from "./components/orderingComponents/HowToOrder";
 import OrderProgress from "./components/orderingComponents/OrderProgress";
-import Footer from "./components/orderingComponents/Footer";
+//import Footer from "./components/orderingComponents/Footer";
 import PastCreations from "./components/orderingComponents/PastCreations";
 import FeaturedCategories from "./components/orderingComponents/FeaturedCategories";
 import Cart from "./components/orderingComponents/Cart";
@@ -301,7 +301,7 @@ import OrderVolumeHeatmap from './components/Analytics/heatmap';
 import TopProductsList from './components/Analytics/topProducts';
 
 import AllOrdersPage from './pages/AllOrdersPage/AllOrdersPage';
-import ProductManagementPage from './pages/ProductManagementPage/ProductManagementPage';
+//import ProductManagementPage from './pages/ProductManagementPage/ProductManagementPage';
 
 export default function App() {
 
