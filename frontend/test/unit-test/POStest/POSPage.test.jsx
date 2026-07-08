@@ -68,4 +68,31 @@ describe('POSPage', () => {
     expect(packageTextMatches).toHaveLength(2);
     expect(packageTextMatches[1]).toBeInTheDocument();
   });
+
+  // Week 3 Day 2: regression test for product retrieval from the backend in the POS/cart flow.
+  it('loads products from the backend when the POS page opens', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: [
+          {
+            id: 'db-1',
+            name: 'Database Cake',
+            category: 'Pastry',
+            price: 850,
+            inclusion: 'Freshly baked',
+            image_url: null,
+            stock_quantity: 10,
+            is_active: true,
+          },
+        ],
+      }),
+    });
+
+    render(<POSPage />);
+
+    expect(globalThis.fetch).toHaveBeenCalled();
+    expect(screen.getByText(/current order/i)).toBeInTheDocument();
+  });
 });
