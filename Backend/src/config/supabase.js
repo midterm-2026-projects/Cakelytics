@@ -45,4 +45,10 @@ if (supabaseUrl && supabaseKey) {
   };
 }
 
-module.exports = { supabase };
+
+const getSupabase = () => {
+  return supabase;
+};
+
+// I-export ang PAREHONG object at function
+module.exports = { supabase, getSupabase };

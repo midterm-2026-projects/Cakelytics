@@ -1,21 +1,66 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import SearchBar from "../../components/POScomponents/SearchBar";
 import CategoryFilters from "../../components/POScomponents/CategoryFilter";
 import ProductCard from "../../components/POScomponents/ProductCards";
 import OrderSidebar from "../../components/POScomponents/OrderSidebar";
 
-import { products } from "../../data/products";
+import { products as mockProducts } from "../../data/products";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
 export default function POSPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [mode, setMode] = useState("Now");
   const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState(mockProducts);
   const [customerName, setCustomerName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [additional, setAdditional] = useState(0);
   const [discount, setDiscount] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProducts = async () => {
+      try {
+        // Week 3 Day 2: retrieve product catalog from the backend for the POS/cart flow.
+        // This connects the POS page to real product data from the database.
+        const response = await fetch(`${API_BASE}/products`);
+        const body = await response.json();
+
+        if (!response.ok || !body?.success) {
+          throw new Error(body?.message || "Unable to load products");
+        }
+
+        const normalizedProducts = (body.data || []).map((product) => ({
+          id: product.id,
+          name: product.name,
+          price: Number(product.price) || 0,
+          category: product.category,
+          image: product.image_url || "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=900&q=80",
+          details: [product.inclusion, ...(Array.isArray(product.description_points) ? product.description_points : [])].filter(Boolean),
+          stock: product.stock_quantity ?? "Available",
+        }));
+
+        if (isMounted) {
+          setProducts(normalizedProducts.length > 0 ? normalizedProducts : mockProducts);
+        }
+      } catch (error) {
+        console.error("Week 3 Day 2 - product retrieval failed:", error);
+        if (isMounted) {
+          setProducts(mockProducts);
+        }
+      }
+    };
+
+    loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filteredProducts = useMemo(
     () =>
@@ -32,6 +77,8 @@ export default function POSPage() {
     [activeCategory, searchTerm]
   );
 
+  // Week 3 Day 2: cart totals are calculated from the selected items and quantity.
+  // This handles subtotal and overall total computation for the cart.
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal + additional - discount;
@@ -58,6 +105,8 @@ export default function POSPage() {
       return;
     }
 
+    // Week 3 Day 2: add the selected product to the cart and increase quantity when it already exists.
+    // This implements add-to-cart and quantity update logic for the POS flow.
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === product.id);
       if (existing) {

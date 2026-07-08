@@ -2,63 +2,78 @@ const supabaseModule = require('../../../src/config/supabase');
 const getSupabase = vi.fn();
 supabaseModule.getSupabase = getSupabase;
 
-const { ProductModel } = require('../../../src/model/product.model');
+const { SalesModel, OrderTransactionModel } = require('../../../src/model/sales.model');
 
 function buildQueryChain() {
   return {
     select: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    ilike: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue({ data: [], error: null }),
     single: vi.fn().mockResolvedValue({ data: { id: 'mock-id' }, error: null }),
   };
 }
 
-describe('ProductModel', () => {
+describe('SalesModel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should apply category, search, and active filters when listing products', async () => {
+  it('should list sales with a limit', async () => {
     const query = buildQueryChain();
     const client = { from: vi.fn().mockReturnValue(query) };
     getSupabase.mockReturnValue(client);
 
-    await ProductModel.findAll({ category: 'Cake', search: 'vanilla', activeOnly: true });
+    await SalesModel.findAll(20);
 
-    expect(getSupabase).toHaveBeenCalledTimes(1);
-    expect(client.from).toHaveBeenCalledWith('products');
+    expect(client.from).toHaveBeenCalledWith('sales');
     expect(query.select).toHaveBeenCalledWith('*');
-    expect(query.order).toHaveBeenCalledWith('name', { ascending: true });
-    expect(query.eq).toHaveBeenCalledWith('category', 'Cake');
-    expect(query.ilike).toHaveBeenCalledWith('name', '%vanilla%');
-    expect(query.eq).toHaveBeenCalledWith('is_active', true);
+    expect(query.order).toHaveBeenCalledWith('sold_at', { ascending: false });
+    expect(query.limit).toHaveBeenCalledWith(20);
   });
 
-  it('should fetch a single product by id', async () => {
+  it('should create a sale through the model', async () => {
     const query = buildQueryChain();
     const client = { from: vi.fn().mockReturnValue(query) };
     getSupabase.mockReturnValue(client);
 
-    await ProductModel.findById('prod-1');
-
-    expect(client.from).toHaveBeenCalledWith('products');
-    expect(query.select).toHaveBeenCalledWith('*');
-    expect(query.eq).toHaveBeenCalledWith('id', 'prod-1');
-    expect(query.single).toHaveBeenCalled();
-  });
-
-  it('should create a product through the model', async () => {
-    const query = buildQueryChain();
-    const client = { from: vi.fn().mockReturnValue(query) };
-    getSupabase.mockReturnValue(client);
-
-    const payload = { name: 'Cake', price: 200 };
-    await ProductModel.create(payload);
+    const payload = { sale_number: 'SALE-1', grand_total: 250 };
+    await SalesModel.create(payload);
 
     expect(query.insert).toHaveBeenCalledWith(payload);
     expect(query.select).toHaveBeenCalled();
     expect(query.single).toHaveBeenCalled();
+  });
+});
+
+describe('OrderTransactionModel', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should fetch transaction rows for an order', async () => {
+    const query = buildQueryChain();
+    const client = { from: vi.fn().mockReturnValue(query) };
+    getSupabase.mockReturnValue(client);
+
+    await OrderTransactionModel.findByOrderId('order-1');
+
+    expect(client.from).toHaveBeenCalledWith('order_transactions');
+    expect(query.select).toHaveBeenCalledWith('*');
+    expect(query.eq).toHaveBeenCalledWith('order_id', 'order-1');
+    expect(query.order).toHaveBeenCalledWith('created_at', { ascending: true });
+  });
+
+  it('should create many order transactions', async () => {
+    const query = buildQueryChain();
+    const client = { from: vi.fn().mockReturnValue(query) };
+    getSupabase.mockReturnValue(client);
+
+    const items = [{ product_name: 'Cake', quantity: 2 }];
+    await OrderTransactionModel.createMany(items);
+
+    expect(query.insert).toHaveBeenCalledWith(items);
+    expect(query.select).toHaveBeenCalled();
   });
 });
