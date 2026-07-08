@@ -1,8 +1,10 @@
-import analyticsModel from "../../model/analytics.model.js";
+const analyticsModel = require("../../model/analytics.model.js");
 
-export default {
-  async getRecommendations() {
+const ActionableRecommendationService = {
+  async getActionableRecommendations() {
     const result = await analyticsModel.getActionableRecommendations();
     return result;
   }
 };
+
+module.exports = ActionableRecommendationService;

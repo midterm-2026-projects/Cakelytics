@@ -1,6 +1,6 @@
-const { AuthService } = require('../services/auth.service.js');
-const { ok, fail } = require('../utils/response.js');
-const { LoginSchema } = require('../schemas/index.js');
+const { AuthService } = require('../../services/auth.service.js');
+const { ok, fail } = require('../../utils/response.js');
+const { LoginSchema } = require('../../schemas/index.js');
 
 const AuthController = {
 

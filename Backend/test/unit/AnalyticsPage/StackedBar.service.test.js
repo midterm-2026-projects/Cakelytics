@@ -1,29 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import StackedBarServices from "../../../src/services/AnalyticsPage/StackedBar.service";
-import analyticsModel from "../../../src/model/analytics.model";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-
-vi.mock("../../../src/model/analytics.model", () => ({
-  default: {
-    getStackedBarByTimeframe: vi.fn(),
-  },
-}));
-
-
+const { StackedBarModel } = require("../../../src/model/analytics/stackedBar.model.js");
+const { StackedBarServices } = require("../../../src/services/AnalyticsPage/StackedBar.service.js");
 
 describe("StackedBar.services", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should returns trend data when model fetch is successful", async () => {
-    const mockTrendData = [
-      { period: "Mon", sales: 12000, expenses: 7000 },
-      { period: "Tue", sales: 15000, expenses: 8200 },
-      { period: "Wed", sales: 9800, expenses: 6100 },
-    ];
+  afterEach(() => {
+    vi.restoreAllMocks(); 
+  });
 
-    analyticsModel.getStackedBarByTimeframe.mockResolvedValue(mockTrendData);
+  it("should return trend data when model fetch is successful", async () => {
+    const mockTrendData = {
+      orders: [
+        { grand_total: 12000, status: 'Completed', created_at: '2026-10-01' }
+      ],
+      ingredients: [
+        { name: 'Flour', stock_quantity: 10, cost_per_unit: 50, created_at: '2026-10-01' }
+      ]
+    };
+
+    vi.spyOn(StackedBarModel, "getStackedBarByTimeframe").mockResolvedValue(mockTrendData);
 
     const result = await StackedBarServices.getStackedBarByTimeframe("Last 7 Days");
 
@@ -31,11 +30,14 @@ describe("StackedBar.services", () => {
   });
 
   it("should call the model with the correct timeframe", async () => {
-    analyticsModel.getStackedBarByTimeframe.mockResolvedValue([]);
+    const spy = vi.spyOn(StackedBarModel, "getStackedBarByTimeframe").mockResolvedValue({
+      orders: [],
+      ingredients: []
+    });
 
     await StackedBarServices.getStackedBarByTimeframe("This Month");
 
-    expect(analyticsModel.getStackedBarByTimeframe).toHaveBeenCalledTimes(1);
-    expect(analyticsModel.getStackedBarByTimeframe).toHaveBeenCalledWith("This Month");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith("This Month");
   });
 });
