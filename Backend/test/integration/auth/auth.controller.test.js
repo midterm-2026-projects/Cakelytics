@@ -3,7 +3,7 @@ const responseUtils = require('../../../src/utils/response.js');
 responseUtils.ok = vi.fn();
 responseUtils.fail = vi.fn();
 
-const { AuthController } = require('../../../src/controllers/auth.controller.js');
+const { AuthController } = require('../../../src/controller/auth.controller.js');
 const { AuthService } = require('../../../src/services/auth.service.js');
 const { LoginSchema } = require('../../../src/schemas/index.js');
 
