@@ -1,8 +1,10 @@
-import analyticsModel from "../../model/analytics.model.js"
+const analyticsModel = require("../../model/analytics.model.js");
 
-export default {
-  async getProductTrendsByTimeframe(timeframe){
+const ProductForecastService = {
+  async getProductTrendsByTimeframe(timeframe) {
     const result = await analyticsModel.getProductForecasts(timeframe);
     return result;
   }
-}
+};
+
+module.exports = ProductForecastService;

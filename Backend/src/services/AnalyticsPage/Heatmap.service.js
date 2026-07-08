@@ -1,8 +1,10 @@
-import analyticsModel from "../../model/analytics.model"
+const analyticsModel = require("../../model/analytics.model.js");
 
-export default {
-  async getOrderVolumeByTimeframe(timeframe){
+const HeatmapService = {
+  async getOrderVolumeByTimeframe(timeframe) {
     const result = await analyticsModel.getOrderVolumeByTimeframe(timeframe);
     return result;
   }
-}
+};
+
+module.exports = HeatmapService;

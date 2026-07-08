@@ -1,17 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import FourKpiService from "../../../src/services/AnalyticsPage/FourKPI.service.js";
-import analyticsModel from "../../../src/model/analytics.model.js";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// 1. WALA NANG vi.mock(...) SA TAAS! BURA NA YON.
 
-vi.mock("../../../src/model/analytics.model", () => ({
-  default: {
-    getKpiByTimeframe: vi.fn(),
-  },
-}));
+// 2. PURE COMMONJS REQUIRE (Tiyak na iisang object na lang ito sa memory)
+const { FourKpiModel } = require("../../../src/model/analytics/fourKPI.model.js");
+const { FourKpiService } = require("../../../src/services/AnalyticsPage/FourKPI.service.js");
 
 describe("FourKPI.services", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    // Importante ito kapag gumagamit ng vi.spyOn para malinis per test
+    vi.restoreAllMocks(); 
   });
 
   it("should return KPI data when model fetch is successful", async () => {
@@ -26,7 +28,8 @@ describe("FourKPI.services", () => {
       mDelta: 1.4,
     };
 
-    analyticsModel.getKpiByTimeframe.mockResolvedValue(mockKpiData);
+    // 3. GAMITIN ANG vi.spyOn() PARA I-HIJACK ANG FUNCTION
+    vi.spyOn(FourKpiModel, "getKpiByTimeframe").mockResolvedValue(mockKpiData);
 
     const result = await FourKpiService.getKpiByTimeframe("week");
 
@@ -34,11 +37,12 @@ describe("FourKPI.services", () => {
   });
 
   it("should call the model with the correct timeframe", async () => {
-    analyticsModel.getKpiByTimeframe.mockResolvedValue({});
+    // 4. GAMITIN ULIT ANG vi.spyOn() DITO
+    const spy = vi.spyOn(FourKpiModel, "getKpiByTimeframe").mockResolvedValue({});
 
     await FourKpiService.getKpiByTimeframe("month");
 
-    expect(analyticsModel.getKpiByTimeframe).toHaveBeenCalledTimes(1);
-    expect(analyticsModel.getKpiByTimeframe).toHaveBeenCalledWith("month");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith("month");
   });
 });
