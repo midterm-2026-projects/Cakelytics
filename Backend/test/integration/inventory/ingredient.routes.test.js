@@ -94,12 +94,18 @@ describe('Ingredient Routes Integration', () => {
     });
 
     it('should return 422 when qty is missing in payload', async () => {
-      const res = await request(app)
-        .patch(`/api/inventory/ingredients/${safeId}/restock`)
-        .set('Authorization', 'Bearer valid-token')
-        .send({}); 
-      expect(res.status).toBe(422);
+    IngredientService.restock.mockRejectedValueOnce({
+      name: 'ZodError',
+      errors: [{ path: ['added_qty'], message: 'Required' }],
     });
+
+    const res = await request(app)
+      .patch(`/api/inventory/ingredients/${safeId}/restock`)
+      .set('Authorization', 'Bearer valid-token')
+      .send({});
+
+    expect(res.status).toBe(422);
+  });
 
     it('should return 200 when ingredient is successfully restocked', async () => {
       const res = await request(app)

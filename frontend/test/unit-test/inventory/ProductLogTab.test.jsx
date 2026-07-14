@@ -38,10 +38,16 @@ describe('ProductLogTab Component', () => {
     expect(screen.getAllByText('+24 pcs').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should fall back to mock data and still render rows when context returns an empty array', () => {
+  // NOTE: ang totoong ProductLogTab.jsx ay WALANG mock/fallback data
+  // fallback array (`context.productionLogs || []` lang), kaya't hindi
+  // dapat inaasahan na may makikitang 'Chocolate Ensaymada'. Ito ang
+  // aktwal na empty-state message na lalabas sa ganitong sitwasyon.
+  it('should display the default empty-state message when context returns an empty array', () => {
     useApp.mockReturnValue({ productionLogs: [] });
     render(<ProductLogTab />);
-    expect(screen.getAllByText('Chocolate Ensaymada').length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByText('Wala pang production record. Mag-set ng target sa Recipe Log at i-confirm ang batch.')
+    ).toBeInTheDocument();
   });
 
   it('should display the empty-state message when a search query matches zero production records', () => {

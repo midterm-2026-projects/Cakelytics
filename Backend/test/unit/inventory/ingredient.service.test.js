@@ -1,16 +1,21 @@
-const { IngredientModel } = require('../../../src/model/inventory.model.js');
+// 👉 FIX: Itinama ang import path para mag-match sa ginagamit ng service
+const { IngredientModel } = require('../../../src/model/inventory/ingredient.model.js');
 const { IngredientService } = require('../../../src/services/inventory/ingredient.service.js');
+
+const { InventoryLogModel } = require('../../../src/model/inventory/inventoryLog.model.js');
 
 let dbClient = null;
 try {
   // dbClient = require('../../../src/config/db.js');
 } catch (e) {}
 
+InventoryLogModel.logHistory = vi.fn().mockResolvedValue({ error: null });
+
+// Ngayon, gagana na ang mocks dahil iisang object na ang tinutukoy nila
 IngredientModel.findAll   = vi.fn();
 IngredientModel.findById  = vi.fn();
 IngredientModel.create    = vi.fn();
 IngredientModel.update    = vi.fn();
-IngredientModel.setStock  = vi.fn();
 IngredientModel.delete    = vi.fn();
 
 describe('IngredientService', () => {
@@ -25,9 +30,7 @@ describe('IngredientService', () => {
     }
   });
 
-  afterEach(async () => {
-    // isolation placeholder
-  });
+  afterEach(async () => {});
 
   afterAll(async () => {
     if (dbClient && typeof dbClient.disconnect === 'function') await dbClient.disconnect();
@@ -94,39 +97,37 @@ describe('IngredientService', () => {
     await expect(IngredientService.update('i-1', {})).rejects.toThrow();
   });
 
-
   it('it should returns the updated stock after a successful restock', async () => {
-    IngredientModel.findById.mockResolvedValue({ data: { stock_quantity: 10 }, error: null });
-    IngredientModel.setStock.mockResolvedValue({ data: { stock_quantity: 15 }, error: null });
-    const res = await IngredientService.restock('i-1', 5);
+    IngredientModel.findById.mockResolvedValue({ data: { name: 'Test', stock_quantity: 10 }, error: null });
+    IngredientModel.update.mockResolvedValue({ data: { stock_quantity: 15 }, error: null });
+    const res = await IngredientService.restock('i-1', { added_qty: 5, minimum_stock: 0 });
     expect(res.stock_quantity).toBe(15);
-    expect(IngredientModel.setStock).toHaveBeenCalledWith('i-1', 15);
+    expect(IngredientModel.update).toHaveBeenCalledWith('i-1', { stock_quantity: 15, minimum_stock: 0 });
   });
 
   it('it should returns an error when findById cannot find the ingredient during restock', async () => {
     IngredientModel.findById.mockResolvedValue({ data: null, error: null });
-    await expect(IngredientService.restock('does-not-exist', 5)).rejects.toThrow();
+    await expect(IngredientService.restock('does-not-exist', { added_qty: 5 })).rejects.toThrow();
   });
 
   it('it should returns an error when findById fails during restock', async () => {
     IngredientModel.findById.mockResolvedValue({ data: null, error: new Error('query failed') });
-    await expect(IngredientService.restock('i-1', 5)).rejects.toThrow();
+    await expect(IngredientService.restock('i-1', { added_qty: 5 })).rejects.toThrow();
   });
 
   it('it should returns an error when setStock fails during restock', async () => {
-    IngredientModel.findById.mockResolvedValue({ data: { stock_quantity: 8 }, error: null });
-    IngredientModel.setStock.mockResolvedValue({ data: null, error: new Error('write failed') });
-    await expect(IngredientService.restock('i-1', 2)).rejects.toThrow();
+    IngredientModel.findById.mockResolvedValue({ data: { name: 'Test', stock_quantity: 8 }, error: null });
+    IngredientModel.update.mockResolvedValue({ data: null, error: new Error('write failed') });
+    await expect(IngredientService.restock('i-1', { added_qty: 2 })).rejects.toThrow();
   });
 
   it('it should handles zero restock quantity without returning an error', async () => {
-    IngredientModel.findById.mockResolvedValue({ data: { stock_quantity: 10 }, error: null });
-    IngredientModel.setStock.mockResolvedValue({ data: { stock_quantity: 10 }, error: null });
-    const res = await IngredientService.restock('i-1', 0);
-    expect(IngredientModel.setStock).toHaveBeenCalledWith('i-1', 10);
+    IngredientModel.findById.mockResolvedValue({ data: { name: 'Test', stock_quantity: 10 }, error: null });
+    IngredientModel.update.mockResolvedValue({ data: { stock_quantity: 10 }, error: null });
+    const res = await IngredientService.restock('i-1', { added_qty: 0, minimum_stock: 0 });
+    expect(IngredientModel.update).toHaveBeenCalledWith('i-1', { stock_quantity: 10, minimum_stock: 0 });
     expect(res.stock_quantity).toBe(10);
   });
-
 
   it('it should successfully delete the ingredient', async () => {
     IngredientModel.delete.mockResolvedValue({ error: null });

@@ -5,16 +5,23 @@ import { Table, Tr, Td, Card, Pagination } from '../../components/ui';
 
 const PER_PAGE = 10;
 
-// ─── MOCK DATA FALLBACKS ───
-const MOCK_PRODUCTION_LOGS = [
-  { id: 'pl1', dt: '2026-06-24 10:00', product: 'Chocolate Ensaymada', produced: 24, yieldUnit: 'pcs' },
-  { id: 'pl2', dt: '2026-06-23 11:30', product: 'Ube Cake (Small)', produced: 6, yieldUnit: 'pcs' },
-  { id: 'pl3', dt: '2026-06-22 09:15', product: 'Spanish Bread', produced: 30, yieldUnit: 'pcs' },
-];
+const formatLocalTime = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-PH', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
 
 export default function ProductLogTab() {
   const context = useApp() || {};
-  const productionLogs = context.productionLogs && context.productionLogs.length > 0 ? context.productionLogs : MOCK_PRODUCTION_LOGS;
+  const productionLogs = context.productionLogs || [];
 
   const [page, setPage]         = useState(1);
   const [search, setSearch]     = useState('');
@@ -24,20 +31,21 @@ export default function ProductLogTab() {
     return productionLogs.filter(pl => {
       if (search && !pl.product.toLowerCase().includes(search.toLowerCase())) return false;
 
+      if (!pl.dt && filterDate !== 'All') return false;
+      const logDate = new Date(pl.dt);
+      const now = new Date();
+
       if (filterDate === 'Today') {
-        const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        return pl.dt?.includes(today.split(',')[0]) && pl.dt?.includes(today.split(', ')[1]);
+
+        return logDate.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) === 
+               now.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' });
       }
       if (filterDate === 'This Week') {
-        if (!pl.dt) return false;
-        const logDate = new Date(pl.dt);
-        const diffTime = Math.abs(new Date() - logDate);
+        const diffTime = Math.abs(now - logDate);
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) <= 7;
       }
       if (filterDate === 'This Month') {
-        if (!pl.dt) return false;
-        const now = new Date();
-        const logDate = new Date(pl.dt);
+        // Siguraduhing tugma sa buwan at taon
         return logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear();
       }
       return true;
@@ -60,7 +68,7 @@ export default function ProductLogTab() {
 
         {/* SEARCH + DATE FILTER */}
         <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-brand-100 bg-brand-50/40">
-          <div className="relative flex-1 min-w-[180px]">
+          <div className="relative flex-1 min-w-45">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-300" />
             <input
               type="text"
@@ -94,7 +102,7 @@ export default function ProductLogTab() {
               <div key={pl.id} className="p-3 bg-white border border-brand-100 rounded-xl flex justify-between items-center shadow-sm">
                 <div>
                   <h4 className="font-bold text-brand-900 text-sm">{pl.product}</h4>
-                  <p className="text-[11px] text-brand-400 mt-0.5">{pl.dt}</p>
+                  <p className="text-[11px] text-brand-400 mt-0.5">{formatLocalTime(pl.dt)}</p>
                 </div>
                 <span className="text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-md">
                   +{pl.produced} {pl.yieldUnit}
@@ -112,7 +120,8 @@ export default function ProductLogTab() {
             ]}>
               {paged.map(pl => (
                 <Tr key={pl.id}>
-                  <Td className="text-xs text-brand-500 whitespace-nowrap font-medium">{pl.dt}</Td>
+                  
+                  <Td className="text-xs text-brand-500 whitespace-nowrap font-medium">{formatLocalTime(pl.dt)}</Td>
                   <Td><strong>{pl.product}</strong></Td>
                   <Td>
                     <span className="inline-flex items-center gap-1 text-sm font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-md">

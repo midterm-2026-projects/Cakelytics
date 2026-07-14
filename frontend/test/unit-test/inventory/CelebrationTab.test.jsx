@@ -84,19 +84,21 @@ describe('CelebrationTab Component', () => {
 
     fireEvent.click(screen.getByText('Save Material'));
 
+    // NOTE: totoong field names na ginagamit ng component sa create-mode payload
+    // (stock_quantity / minimum_stock), hindi "stock"/"min".
     expect(addMaterialMock).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Custom Cake Topper',
-        stock: 10,
-        min: 2,
+        stock_quantity: 10,
+        minimum_stock: 2,
         category: 'Celebration Material',
       })
     );
   });
 
-  it('should call updateMaterial with computed new stock (existing + added qty) when add stock is submitted', () => {
-    const updateMaterialMock = vi.fn();
-    useApp.mockReturnValue({ materials: mockMaterials, updateMaterial: updateMaterialMock });
+  it('should call restockMaterial with the added quantity when add stock is submitted', () => {
+    const restockMaterialMock = vi.fn();
+    useApp.mockReturnValue({ materials: mockMaterials, restockMaterial: restockMaterialMock });
     render(<CelebrationTab />);
 
     fireEvent.click(screen.getAllByText('Add Stock')[0]);
@@ -107,11 +109,12 @@ describe('CelebrationTab Component', () => {
     const allAddStockBtns = screen.getAllByText('Add Stock');
     fireEvent.click(allAddStockBtns[allAddStockBtns.length - 1]);
 
-    expect(updateMaterialMock).toHaveBeenCalledWith(
+    // NOTE: ang totoong context function na tinatawag ng component ay
+    // "restockMaterial", hindi "updateMaterial" — at 2 args lang
+    // (id, data) ang ipinapasa, hindi 4.
+    expect(restockMaterialMock).toHaveBeenCalledWith(
       'mat-1',
-      expect.objectContaining({ stock: 25 }),
-      10,
-      'Stock added'
+      expect.objectContaining({ added_qty: 10 })
     );
   });
 

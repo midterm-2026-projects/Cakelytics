@@ -15,7 +15,7 @@ const MOCK_MATERIALS = [
 
 export default function CelebrationTab() {
   const context = useApp() || {};
-  const { addMaterial, updateMaterial, deleteMaterial } = context;
+  const { addMaterial, updateMaterial, deleteMaterial, restockMaterial } = context;
   const materials = context.materials && context.materials.length > 0 ? context.materials : MOCK_MATERIALS;
 
   const { show: showToast } = useToast();
@@ -31,15 +31,15 @@ export default function CelebrationTab() {
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const handleSave = (data, addedQty = 0, note = '') => {
-    if (editMat?.id) {
-      if (updateMaterial) updateMaterial(editMat.id, data, addedQty, note);
-      showToast(`+${addedQty} ${editMat.unit} na-add sa ${editMat.name}.`);
-    } else {
-      if (addMaterial) addMaterial(data);
-      showToast('Celebration material added.');
-    }
-    setModalOpen(false);
-  };
+      if (editMat?.id) {
+        if (restockMaterial) restockMaterial(editMat.id, data);
+        showToast(`+${addedQty} ${editMat.unit} na-add sa ${editMat.name}.`);
+      } else {
+        if (addMaterial) addMaterial(data);
+        showToast('Celebration material added.');
+      }
+      setModalOpen(false);
+    };
 
   const handleDelete = () => {
     if (deleteMaterial) deleteMaterial(deleteTarget.id);
@@ -177,15 +177,27 @@ function MaterialModal({ isOpen, onClose, material, onSave }) {
   const addedQty = parseFloat(stock) || 0;
 
   const handleSave = () => {
-    if (!isEdit && (!stock || !name)) return;
-    const newStock = isEdit ? +(material.stock + addedQty).toFixed(4) : addedQty;
-    const dataToSave = isEdit 
-      ? { stock: newStock, min: parseFloat(min), costPerUnit: cost && addedQty ? parseFloat(cost) / addedQty : material?.costPerUnit || 0 }
-      : { name, unit, stock: newStock, min: parseFloat(min), costPerUnit: cost ? parseFloat(cost) / addedQty : 0, category: 'Celebration Material' };
+      if (!isEdit && (!stock || !name)) return;
+      const newStock = isEdit ? +(material.stock + addedQty).toFixed(4) : addedQty;
+      
+      const dataToSave = isEdit 
+        ? {
+            added_qty: addedQty,
+            minimum_stock: parseFloat(min),
+            total_cost: cost ? parseFloat(cost) : 0,
+          }
+        : {
+            name,
+            unit,
+            stock_quantity: newStock,
+            minimum_stock: parseFloat(min),
+            cost_per_unit: cost ? parseFloat(cost) / addedQty : 0,
+            category: 'Celebration Material',
+          };
 
-    onSave(dataToSave, addedQty, isEdit ? 'Stock added' : 'Initial stock');
-    onClose();
-  };
+      onSave(dataToSave, addedQty, isEdit ? 'Stock added' : 'Initial stock');
+      onClose();
+    };
 
   return (
     <Modal

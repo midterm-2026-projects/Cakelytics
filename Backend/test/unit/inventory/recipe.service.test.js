@@ -1,10 +1,5 @@
-const { RecipeModel } = require('../../../src/model/inventory.model.js');
+const { RecipeModel } = require('../../../src/model/inventory/recipe.model.js');
 const { RecipeService } = require('../../../src/services/inventory/recipe.service.js');
-
-let dbClient = null;
-try {
-  // dbClient = require('../../../src/config/db.js');
-} catch (e) {}
 
 RecipeModel.findAll           = vi.fn();
 RecipeModel.findById          = vi.fn();
@@ -15,24 +10,8 @@ RecipeModel.deleteIngredients = vi.fn();
 RecipeModel.delete            = vi.fn();
 
 describe('RecipeService', () => {
-  beforeAll(async () => {
-    if (dbClient && typeof dbClient.connect === 'function') await dbClient.connect();
-  });
-
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    if (dbClient && typeof dbClient.query === 'function') {
-      await dbClient.query('DELETE FROM recipe_ingredients;');
-      await dbClient.query('DELETE FROM recipes;');
-    }
-  });
-
-  afterEach(async () => {
-    // isolation placeholder
-  });
-
-  afterAll(async () => {
-    if (dbClient && typeof dbClient.disconnect === 'function') await dbClient.disconnect();
   });
 
   it('it should returns all recipes successfully', async () => {

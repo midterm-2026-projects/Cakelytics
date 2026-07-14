@@ -21,8 +21,8 @@ const MaterialController = {
   },
   restock: async (req, res, next) => {
     try {
-      const { qty } = RestockSchema.parse(req.body);
-      ok(res, await MaterialService.restock(req.params.id, qty), 'Restocked');
+      // const { qty } = RestockSchema.parse(req.body);
+      ok(res, await MaterialService.restock(req.params.id, req.body), 'Restocked');
     } catch (err) { next(err); }
   },
   delete: async (req, res, next) => {

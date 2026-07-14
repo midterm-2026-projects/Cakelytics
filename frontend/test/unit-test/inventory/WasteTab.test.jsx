@@ -42,7 +42,10 @@ describe('WasteTab Component', () => {
     { id: 'mat-1', name: 'Balloons', stock: 100, unit: 'pcs', costPerUnit: 20 },
   ];
 
-  it('should call logWaste with estimated cost computed as costPerUnit * qty when logging ingredient waste', () => {
+  it('should call logWaste with the correct backend payload when logging ingredient waste', () => {
+    // NOTE: ang totoong button text ay "Spoiled Ingredient" (walang literal
+    // na "+" — icon lang 'yon), at ang aktwal na payload keys ay
+    // waste_type / item_name / quantity (hindi type / item / rawQty).
     const logWasteMock = vi.fn();
     useApp.mockReturnValue({
       wasteLogs: [],
@@ -53,7 +56,7 @@ describe('WasteTab Component', () => {
     });
     render(<WasteTab />);
 
-    fireEvent.click(screen.getByText('+ Spoiled Ingredient'));
+    fireEvent.click(screen.getByText('Spoiled Ingredient'));
 
     const selectEl = screen.getByLabelText('Pumili ng Sangkap');
     fireEvent.change(selectEl, { target: { value: 'Eggs' } });
@@ -65,15 +68,15 @@ describe('WasteTab Component', () => {
 
     expect(logWasteMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'ingredient',
-        item: 'Eggs',
-        rawQty: 3,
+        waste_type: 'ingredient',
+        item_name: 'Eggs',
+        quantity: 3,
         cost: 30,
       })
     );
   });
 
-  it('should call logWaste with estimated cost computed when logging product waste', () => {
+  it('should call logWaste with the correct backend payload when logging product waste', () => {
     const logWasteMock = vi.fn();
     useApp.mockReturnValue({
       wasteLogs: [],
@@ -84,7 +87,7 @@ describe('WasteTab Component', () => {
     });
     render(<WasteTab />);
 
-    fireEvent.click(screen.getByText('+ Unsold Product'));
+    fireEvent.click(screen.getByText('Unsold Product'));
 
     const selectEl = screen.getByLabelText('Select Product');
     fireEvent.change(selectEl, { target: { value: 'Chocolate Cake' } });
@@ -96,15 +99,17 @@ describe('WasteTab Component', () => {
 
     expect(logWasteMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'product',
-        item: 'Chocolate Cake',
-        rawQty: 2,
+        waste_type: 'product',
+        item_name: 'Chocolate Cake',
+        quantity: 2,
         cost: 900,
       })
     );
   });
 
-  it('should call logWaste with estimated cost computed as costPerUnit * qty when logging material waste', () => {
+  it('should call logWaste with the correct backend payload when logging material waste', () => {
+    // NOTE: ang totoong button text ay "Damaged Material", hindi
+    // "Archive Material".
     const logWasteMock = vi.fn();
     useApp.mockReturnValue({
       wasteLogs: [],
@@ -115,7 +120,7 @@ describe('WasteTab Component', () => {
     });
     render(<WasteTab />);
 
-    fireEvent.click(screen.getByText('Archive Material'));
+    fireEvent.click(screen.getByText('Damaged Material'));
 
     const selectEl = screen.getByLabelText('Pumili ng Materyales');
     fireEvent.change(selectEl, { target: { value: 'Balloons' } });
@@ -127,9 +132,9 @@ describe('WasteTab Component', () => {
 
     expect(logWasteMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'material',
-        item: 'Balloons',
-        rawQty: 5,
+        waste_type: 'material',
+        item_name: 'Balloons',
+        quantity: 5,
         cost: 100,
       })
     );

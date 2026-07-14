@@ -1,34 +1,19 @@
-const { WasteModel, IngredientModel, MaterialModel } = require('../../../src/model/inventory.model.js');
+const { WasteModel } = require('../../../src/model/inventory/waste.model.js');
+const { IngredientModel } = require('../../../src/model/inventory/ingredient.model.js');
+const { MaterialModel } = require('../../../src/model/inventory/material.model.js');
+const { InventoryLogModel } = require('../../../src/model/inventory/inventoryLog.model.js');
 const { WasteService } = require('../../../src/services/inventory/waste.service.js');
-
-let dbClient = null;
-try {
-  // dbClient = require('../../../src/config/db.js');
-} catch (e) {}
 
 WasteModel.findAll           = vi.fn();
 WasteModel.create            = vi.fn();
 IngredientModel.deductByName = vi.fn();
 MaterialModel.deductByName   = vi.fn();
+InventoryLogModel.logHistory = vi.fn().mockResolvedValue({ error: null });
 
 describe('WasteService', () => {
-  beforeAll(async () => {
-    if (dbClient && typeof dbClient.connect === 'function') await dbClient.connect();
-  });
-
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    if (dbClient && typeof dbClient.query === 'function') {
-      await dbClient.query('DELETE FROM waste_logs;');
-    }
-  });
-
-  afterEach(async () => {
-    // isolation check placeholder
-  });
-
-  afterAll(async () => {
-    if (dbClient && typeof dbClient.disconnect === 'function') await dbClient.disconnect();
+    InventoryLogModel.logHistory.mockResolvedValue({ error: null });
   });
 
   it('it should returns all waste logs successfully', async () => {

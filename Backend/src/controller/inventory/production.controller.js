@@ -15,6 +15,16 @@ const ProductionController = {
       created(res, await ProductionService.confirmBatch(body), 'Production batch logged');
     } catch (err) { next(err); }
   },
+
+  getShoppingList: async (req, res, next) => {
+    try {
+      // Kunin ang data para sa susunod na 7 araw (halimbawa lang)
+      const startDate = new Date().toISOString();
+      const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      
+      ok(res, await ProductionService.getRequirementsForOrders(startDate, endDate));
+    } catch (err) { next(err); }
+  },
 };
 
 module.exports = { ProductionController };

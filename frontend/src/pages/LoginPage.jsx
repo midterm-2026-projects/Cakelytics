@@ -69,6 +69,7 @@ function InputField({ icon: Icon, type, value, onChange, placeholder, autoComple
           outline: 'none',
           boxShadow: error ? '0 0 0 3px #FEF2F2' : 'none',
           transition: 'border-color 0.15s, box-shadow 0.15s',
+          boxSizing: 'border-box'
         }}
         onFocus={e => {
           e.target.style.borderColor = error ? '#EF4444' : '#5C3317';
@@ -157,7 +158,6 @@ function PrimaryBtn({ onClick, children, disabled }) {
 // ═══════════════════════════════════════════════════════════════
 export default function LoginPage({ onLogin }) {
 
-  // ── Login state variables
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -190,7 +190,6 @@ export default function LoginPage({ onLogin }) {
     doLogin();
   };
 
-  // ── Styles
   const S = {
     root: {
       minHeight: '100vh',
@@ -211,39 +210,32 @@ export default function LoginPage({ onLogin }) {
       pointerEvents: 'none',
     },
     card: {
-      display: 'flex',
       background: '#fff',
       border: '1px solid #E2E8F0',
       borderRadius: 22,
       boxShadow: '0 20px 50px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.06)',
       width: '100%',
       maxWidth: 1100,
-      minHeight: 700,
       position: 'relative',
       zIndex: 1,
       overflow: 'hidden',
-      margin: '24px 16px',
       animation: 'cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both',
     },
     brandPanel: {
-      width: 580,
       flexShrink: 0,
       background: '#3B1F0A',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '48px 32px',
       position: 'relative',
       overflow: 'hidden',
     },
     formPanel: {
       flex: 1,
-      padding: '48px 44px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
-      overflowY: 'auto',
     },
     panelTitle: { fontSize: 22, fontWeight: 700, color: '#0F172A', marginBottom: 6 },
     panelSub:   { fontSize: 14, color: '#64748B', marginBottom: 28, lineHeight: 1.6 },
@@ -253,37 +245,88 @@ export default function LoginPage({ onLogin }) {
     <div style={S.root} onKeyDown={handleKeyDown}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
         @keyframes cardIn {
           from { opacity: 0; transform: translateY(20px) scale(0.98); }
           to   { opacity: 1; transform: none; }
         }
+        
         .input-icon { width: 15px; height: 15px; }
+
+        /* ── RESPONSIVE CLASSES ── */
+        .responsive-card {
+          display: flex;
+          flex-direction: row;
+          min-height: 700px;
+          margin: 24px 16px;
+        }
+        .responsive-brand {
+          width: 580px;
+          padding: 48px 32px;
+        }
+        .responsive-logo {
+          width: 300px;
+          height: auto;
+          margin-bottom: 20px;
+        }
+        .responsive-title {
+          font-size: 22px;
+        }
+        .responsive-form {
+          padding: 48px 44px;
+        }
+
+        /* ── MEDIA QUERIES PARA SA TABLET AT MOBILE ── */
+        @media (max-width: 900px) {
+          .responsive-card {
+            flex-direction: column;
+            min-height: auto;
+            max-height: calc(100vh - 32px); /* Tinitiyak na hindi lalampas sa screen height */
+            overflow-y: auto; /* Magkakaroon ng scrollbar ang loob kapag sobrang liit ng phone */
+            margin: 16px; /* Binawasan ang margin para mas lumaki ang space sa loob */
+          }
+          .responsive-brand {
+            width: 100%;
+            padding: 24px 16px; /* Pinaliit lalo ang padding */
+          }
+          .responsive-logo {
+            width: 130px; /* Pinaliit pa lalo para sa maliit na screens */
+            margin-bottom: 8px;
+          }
+          .responsive-title {
+            font-size: 18px;
+          }
+          .responsive-form {
+            padding: 24px 20px; /* Mas maliit na padding sa form area */
+          }
+        }
       `}</style>
 
       {/* Grid Background */}
       <div style={S.gridBg} />
 
-      <div style={S.card}>
+      <div style={S.card} className="responsive-card">
 
         {/* ── LEFT: BRAND PANEL ── */}
-        <div style={S.brandPanel}>
+        <div style={S.brandPanel} className="responsive-brand">
           <div style={{ position:'absolute', top:-70, right:-70, width:240, height:240, borderRadius:'50%', background:'rgba(255,255,255,0.07)', pointerEvents:'none' }} />
           <div style={{ position:'absolute', bottom:-90, left:-50, width:280, height:280, borderRadius:'50%', background:'rgba(255,255,255,0.05)', pointerEvents:'none' }} />
 
           <img
             src={brandLogo}
             alt="Aileen & Niculus Logo"
-            style={{ width: 300, height: 'auto', marginBottom: 20, position: 'relative', zIndex: 1, filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.5))' }}
+            className="responsive-logo"
+            style={{ position: 'relative', zIndex: 1, filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.5))' }}
           />
           <div style={{ zIndex: 1, position: 'relative', textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#fff', lineHeight: 1.55, letterSpacing: '-0.01em' }}>
+            <div className="responsive-title" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: '#fff', lineHeight: 1.55, letterSpacing: '-0.01em' }}>
               Aileen Cake Max<br/>Bake Shop
             </div>
           </div>
         </div>
 
         {/* ── RIGHT: FORM PANEL ── */}
-        <div style={S.formPanel}>
+        <div style={S.formPanel} className="responsive-form">
           <div>
             <h1 style={S.panelTitle}>Welcome back</h1>
             <p style={S.panelSub}>Sign in to your admin account to continue.</p>
