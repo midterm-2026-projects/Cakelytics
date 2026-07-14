@@ -15,7 +15,7 @@ const MOCK_INGREDIENTS = [
 
 export default function IngredientsTab() {
   const context = useApp() || {};
-  const { addIngredient, updateIngredient, deleteIngredient } = context;
+  const { addIngredient, updateIngredient, deleteIngredient, restockIngredient } = context;
   const ingredients = context.ingredients && context.ingredients.length > 0 ? context.ingredients : MOCK_INGREDIENTS;
 
   const { show: showToast } = useToast();
@@ -31,15 +31,15 @@ export default function IngredientsTab() {
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const handleSave = (data, addedQty = 0, note = '') => {
-    if (editIng?.id) {
-      if (updateIngredient) updateIngredient(editIng.id, data, addedQty, note);
-      showToast(`+${addedQty} ${editIng.unit} na-add sa ${editIng.name}.`);
-    } else {
-      if (addIngredient) addIngredient(data);
-      showToast('Raw ingredient added successfully.');
-    }
-    setModalOpen(false);
-  };
+      if (editIng?.id) {
+        if (restockIngredient) restockIngredient(editIng.id, data);
+        showToast(`+${addedQty} ${editIng.unit} na-add sa ${editIng.name}.`);
+      } else {
+        if (addIngredient) addIngredient(data);
+        showToast('Raw ingredient added successfully.');
+      }
+      setModalOpen(false);
+    };
 
   const handleDelete = () => {
     if (deleteIngredient) deleteIngredient(deleteTarget.id);
@@ -177,15 +177,28 @@ function IngredientModal({ isOpen, onClose, ingredient, onSave }) {
   const addedQty = parseFloat(stock) || 0;
 
   const handleSave = () => {
-    if (!isEdit && (!stock || !name)) return;
-    const newStock = isEdit ? +(ingredient.stock + addedQty).toFixed(4) : addedQty;
-    const dataToSave = isEdit 
-      ? { stock: newStock, min: parseFloat(min), costPerUnit: cost && addedQty ? parseFloat(cost) / addedQty : ingredient?.costPerUnit || 0 }
-      : { name, unit, stock: newStock, min: parseFloat(min), costPerUnit: cost ? parseFloat(cost) / addedQty : 0, category: 'Raw Material' };
+      if (!isEdit && (!stock || !name)) return;
+      const newStock = isEdit ? +(ingredient.stock + addedQty).toFixed(4) : addedQty;
+      
+      const dataToSave = isEdit 
+        ? {
+         
+            added_qty: addedQty,
+            minimum_stock: parseFloat(min),
+            total_cost: cost ? parseFloat(cost) : 0,
+          }
+        : {
+            name,
+            unit,
+            stock_quantity: newStock,
+            minimum_stock: parseFloat(min),
+            cost_per_unit: cost ? parseFloat(cost) / addedQty : 0,
+            category: 'Raw Material',
+          };
 
-    onSave(dataToSave, addedQty, isEdit ? 'Restocked item' : 'Initial stock entry');
-    onClose();
-  };
+      onSave(dataToSave, addedQty, isEdit ? 'Restocked item' : 'Initial stock entry');
+      onClose();
+    };
 
   return (
     <Modal

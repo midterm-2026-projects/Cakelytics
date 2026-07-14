@@ -9,10 +9,17 @@ function errorHandler(err, _req, res, _next) {
   console.error('[ERROR]', err.message || err);
 
   if (err.name === 'ZodError') {
+    // Kukunin niya ang err.errors o err.issues, kung wala, gagamit ng empty array para hindi mag-crash
+    const validationErrors = err.errors || err.issues || [];
+    
     return res.status(422).json({
       success: false,
       message: 'Validation failed',
-      errors: err.errors.map(e => ({ field: e.path.join('.'), issue: e.message })),
+      errors: validationErrors.map(e => ({ 
+        // Gagamit ng optional chaining (?.) para safe
+        field: e.path?.join('.') || 'unknown', 
+        issue: e.message 
+      })),
     });
   }
 

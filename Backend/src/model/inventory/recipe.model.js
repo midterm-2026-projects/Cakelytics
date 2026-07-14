@@ -25,6 +25,13 @@ const RecipeModel = {
 
   deleteIngredients: (recipeId) =>
     supabase.from('recipe_ingredients').delete().eq('recipe_id', recipeId),
+
+  // Idagdag ito sa loob ng RecipeModel object
+  findWithIngredientsByProductId: (productId) =>
+    supabase.from('recipes')
+      .select('*, recipe_ingredients(*)')
+      .eq('product_id', productId)
+      .single(),
 };
 
 module.exports = { RecipeModel };

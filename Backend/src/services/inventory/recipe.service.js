@@ -1,4 +1,4 @@
-const { RecipeModel } = require('../../model/inventory.model.js');
+const { RecipeModel } = require('../../model/inventory/recipe.model.js');
 const { AppError } = require('../../middleware/errorHandler.js');
 
 // RECIPES

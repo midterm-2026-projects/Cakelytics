@@ -19,11 +19,18 @@ const IngredientController = {
       ok(res, await IngredientService.update(req.params.id, body), 'Ingredient updated');
     } catch (err) { next(err); }
   },
-  restock: async (req, res, next) => {
+restock: async (req, res, next) => {
     try {
-      const { qty } = RestockSchema.parse(req.body);
-      ok(res, await IngredientService.restock(req.params.id, qty), 'Restocked');
-    } catch (err) { next(err); }
+      console.log('--- 1. PUMASOK SA CONTROLLER ---');
+      console.log('ID:', req.params.id);
+      console.log('BODY GALING FRONTEND:', req.body);
+      
+      const result = await IngredientService.restock(req.params.id, req.body);
+      ok(res, result, 'Restocked');
+    } catch (err) { 
+      console.error('--- ERROR SA CONTROLLER ---', err.message);
+      next(err); 
+    }
   },
   delete: async (req, res, next) => {
     try {

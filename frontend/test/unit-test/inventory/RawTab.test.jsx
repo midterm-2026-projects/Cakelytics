@@ -60,9 +60,12 @@ describe('RawTab Component', () => {
     expect(screen.getByLabelText(/Dami na Idadagdag/i)).toBeInTheDocument();
   });
 
-  it('should call updateIngredient with computed new stock (existing stock + added qty) when restocking', () => {
-    const updateIngredientMock = vi.fn();
-    useApp.mockReturnValue({ ingredients: mockIngredients, updateIngredient: updateIngredientMock });
+  it('should call restockIngredient with the added quantity when restocking', () => {
+    // NOTE: ang totoong context function na tinatawag ng RawTab component
+    // ay "restockIngredient", hindi "updateIngredient" — at 2 args lang
+    // (id, data) ang ipinapasa, hindi 4.
+    const restockIngredientMock = vi.fn();
+    useApp.mockReturnValue({ ingredients: mockIngredients, restockIngredient: restockIngredientMock });
     render(<RawTab />);
 
     fireEvent.click(screen.getAllByText('Restock')[0]);
@@ -72,11 +75,9 @@ describe('RawTab Component', () => {
 
     fireEvent.click(screen.getByText('Update Stock'));
 
-    expect(updateIngredientMock).toHaveBeenCalledWith(
+    expect(restockIngredientMock).toHaveBeenCalledWith(
       'ing-1',
-      expect.objectContaining({ stock: 25 }),
-      5,
-      'Restocked item'
+      expect.objectContaining({ added_qty: 5 })
     );
   });
 
@@ -93,11 +94,13 @@ describe('RawTab Component', () => {
 
     fireEvent.click(screen.getByText('Save Ingredient'));
 
+    // NOTE: totoong field names na ginagamit ng component sa create-mode
+    // payload (stock_quantity / minimum_stock), hindi "stock"/"min".
     expect(addIngredientMock).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Baking Powder',
-        stock: 3,
-        min: 1,
+        stock_quantity: 3,
+        minimum_stock: 1,
         category: 'Raw Material',
       })
     );

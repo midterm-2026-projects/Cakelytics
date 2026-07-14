@@ -1,10 +1,26 @@
-const { ProductionModel, RecipeModel, IngredientModel, MaterialModel } = require('../../../src/model/inventory.model.js');
+const { supabase } = require('../../../src/config/supabase.js');
+const { InventoryLogModel } = require('../../../src/model/inventory/inventoryLog.model.js');
+const { ProductionModel } = require('../../../src/model/inventory/production.model.js');
+const { RecipeModel } = require('../../../src/model/inventory/recipe.model.js');
+const { IngredientModel } = require('../../../src/model/inventory/ingredient.model.js');
+const { MaterialModel } = require('../../../src/model/inventory/material.model.js');
 const { ProductionService } = require('../../../src/services/inventory/production.service.js');
 
-let dbClient = null;
-try {
-  // dbClient = require('../../../src/config/db.js');
-} catch (e) {}
+// --- direct overwrite ng supabase.from (parehong reference gagamitin ng production.service.js) ---
+const supabaseChain = {
+  select: vi.fn().mockReturnThis(),
+  insert: vi.fn().mockReturnThis(),
+  update: vi.fn().mockReturnThis(),
+  delete: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  order: vi.fn().mockReturnThis(),
+  limit: vi.fn().mockReturnThis(),
+  single: vi.fn().mockResolvedValue({ data: null, error: null }),
+};
+supabase.from = vi.fn(() => supabaseChain);
+
+// --- direct overwrite ng InventoryLogModel ---
+InventoryLogModel.logHistory = vi.fn().mockResolvedValue({ error: null });
 
 RecipeModel.findWithIngredients  = vi.fn();
 ProductionModel.findAll          = vi.fn();
@@ -14,24 +30,8 @@ IngredientModel.deductByName     = vi.fn();
 MaterialModel.deductByName       = vi.fn();
 
 describe('ProductionService', () => {
-  beforeAll(async () => {
-    if (dbClient && typeof dbClient.connect === 'function') await dbClient.connect();
-  });
-
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    if (dbClient && typeof dbClient.query === 'function') {
-      await dbClient.query('DELETE FROM production_deductions;');
-      await dbClient.query('DELETE FROM productions;');
-    }
-  });
-
-  afterEach(async () => {
-    // dynamic integration boundary placeholder
-  });
-
-  afterAll(async () => {
-    if (dbClient && typeof dbClient.disconnect === 'function') await dbClient.disconnect();
   });
 
   it('it should returns all production logs successfully', async () => {
@@ -65,7 +65,7 @@ describe('ProductionService', () => {
     IngredientModel.deductByName.mockResolvedValue({ error: null });
     MaterialModel.deductByName.mockResolvedValue({ error: null });
 
-    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 2 });
+    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 2, total_produced: 2 });
 
     expect(IngredientModel.deductByName).toHaveBeenCalledWith('White sugar', 3);
     expect(MaterialModel.deductByName).toHaveBeenCalledWith('Balloon set (12pcs)', 4);
@@ -83,7 +83,7 @@ describe('ProductionService', () => {
     ProductionModel.insertDeductions.mockResolvedValue({ error: null });
     IngredientModel.deductByName.mockResolvedValue({ error: null });
 
-    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 3 });
+    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 3, total_produced: 3 });
 
     expect(IngredientModel.deductByName).toHaveBeenCalledWith('All-purpose flour', 4.5);
   });
@@ -100,7 +100,7 @@ describe('ProductionService', () => {
     ProductionModel.insertDeductions.mockResolvedValue({ error: null });
     IngredientModel.deductByName.mockResolvedValue({ error: null });
 
-    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1 });
+    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1, total_produced: 1 });
 
     expect(IngredientModel.deductByName).toHaveBeenCalledWith('Butter', 0.25);
     expect(MaterialModel.deductByName).not.toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe('ProductionService', () => {
     ProductionModel.insertDeductions.mockResolvedValue({ error: null });
     MaterialModel.deductByName.mockResolvedValue({ error: null });
 
-    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 2 });
+    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 2, total_produced: 2 });
 
     expect(MaterialModel.deductByName).toHaveBeenCalledWith('Tarpaulin 2x3ft', 2);
     expect(IngredientModel.deductByName).not.toHaveBeenCalled();
@@ -130,7 +130,7 @@ describe('ProductionService', () => {
     ProductionModel.create.mockResolvedValue({ data: { id: 'p-log-4' }, error: null });
     ProductionModel.insertDeductions.mockResolvedValue({ error: null });
 
-    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 5 });
+    await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 5, total_produced: 5 });
 
     expect(IngredientModel.deductByName).not.toHaveBeenCalled();
     expect(MaterialModel.deductByName).not.toHaveBeenCalled();
@@ -138,12 +138,12 @@ describe('ProductionService', () => {
 
   it('returns an error when findWithIngredients cannot find the recipe', async () => {
     RecipeModel.findWithIngredients.mockResolvedValue({ data: null, error: null });
-    await expect(ProductionService.confirmBatch({ recipe_id: 'does-not-exist', batches: 1 })).rejects.toThrow();
+    await expect(ProductionService.confirmBatch({ recipe_id: 'does-not-exist', batches: 1, total_produced: 1 })).rejects.toThrow();
   });
 
   it('returns an error when findWithIngredients fails', async () => {
     RecipeModel.findWithIngredients.mockResolvedValue({ data: null, error: new Error('query failed') });
-    await expect(ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1 })).rejects.toThrow();
+    await expect(ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1, total_produced: 1 })).rejects.toThrow();
   });
 
   it('it should returns an error when the production log cannot be created', async () => {
@@ -155,7 +155,7 @@ describe('ProductionService', () => {
     ProductionModel.create.mockResolvedValue({ data: null, error: new Error('log write failed') });
 
     await expect(
-      ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1 })
+      ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1, total_produced: 1 })
     ).rejects.toThrow();
   });
 
@@ -169,7 +169,7 @@ describe('ProductionService', () => {
     ProductionModel.insertDeductions.mockResolvedValue({ error: new Error('deductions insert failed') });
 
     await expect(
-      ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1 })
+      ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 1, total_produced: 1 })
     ).rejects.toThrow();
   });
 
@@ -183,7 +183,7 @@ describe('ProductionService', () => {
     ProductionModel.insertDeductions.mockResolvedValue({ error: null });
     IngredientModel.deductByName.mockResolvedValue({ error: null });
 
-    const res = await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 2 });
+    const res = await ProductionService.confirmBatch({ recipe_id: 'r-1', batches: 2, total_produced: 2 });
     expect(res.id).toBe('p-log-99');
   });
 });
