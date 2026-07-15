@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Idagdag ang useEffect
 import { Plus, Search } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useToast, Button, Modal, Input, Select, Table, Tr, Td, Pagination, Badge, Card, LevelBar, ConfirmModal } from '../../components/ui';
@@ -30,21 +30,30 @@ export default function IngredientsTab() {
   );
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const handleSave = (data, addedQty = 0, note = '') => {
+  const handleSave = async (data, addedQty = 0, note = '') => {
+    try {
       if (editIng?.id) {
-        if (restockIngredient) restockIngredient(editIng.id, data);
+        if (restockIngredient) await restockIngredient(editIng.id, data);
         showToast(`+${addedQty} ${editIng.unit} na-add sa ${editIng.name}.`);
       } else {
-        if (addIngredient) addIngredient(data);
+        if (addIngredient) await addIngredient(data);
         showToast('Raw ingredient added successfully.');
       }
-      setModalOpen(false);
-    };
+      setModalOpen(false); // Sasarado lang kapag successful ang save
+    } catch (err) {
+      showToast(err.message || 'Failed to save ingredient', 'error'); // Sasaluhin ang API error
+      throw err; // I-throw pabalik para hindi mag-onClose sa modal
+    }
+  };
 
-  const handleDelete = () => {
-    if (deleteIngredient) deleteIngredient(deleteTarget.id);
-    showToast(`${deleteTarget.name} removed from ingredients.`, 'warning');
-    setDeleteTarget(null);
+  const handleDelete = async () => {
+    try {
+      if (deleteIngredient) await deleteIngredient(deleteTarget.id);
+      showToast(`${deleteTarget.name} removed from ingredients.`, 'warning');
+      setDeleteTarget(null);
+    } catch (err) {
+      showToast(err.message || 'Failed to delete ingredient', 'error');
+    }
   };
 
   return (
@@ -74,9 +83,9 @@ export default function IngredientsTab() {
           </div>
         </div>
 
-        {/* ─── RESPONSIVE CONTAINER ─── */}
+        {/* Responsive Container */}
         <div className="px-4 pb-4 mt-4">
-          {/* MOBILE CARDS VIEW */}
+          {/* Mobile Cards View */}
           <div className="block md:hidden space-y-3">
             {paged.map(ing => {
               const st = ingStatus(ing.stock, ing.min);
@@ -103,7 +112,7 @@ export default function IngredientsTab() {
             })}
           </div>
 
-          {/* DESKTOP TABLE VIEW */}
+          {/* Desktop Table View */}
           <div className="hidden md:block">
             <Table columns={[
               { label: 'Ingredient Name' },
@@ -158,47 +167,84 @@ export default function IngredientsTab() {
 }
 
 function IngredientModal({ isOpen, onClose, ingredient, onSave }) {
+  const { show: showToast } = useToast();
   const [name, setName]   = useState('');
   const [unit, setUnit]   = useState('kg');
   const [stock, setStock] = useState('');
   const [min, setMin]     = useState(ingredient?.min ?? '');
   const [cost, setCost]   = useState('');
-  
+
   const isEdit = !!ingredient?.id;
 
-  useState(() => {
-    setName('');
-    setUnit('kg');
-    setStock('');
-    setMin(ingredient?.min ?? '');
-    setCost('');
-  });
+  // ✅ TAMANG PAG-SYNC NG STATE KAPAG BINUKSAN ANG MODAL
+  useEffect(() => {
+    if (isOpen) {
+      setName(ingredient?.name ?? '');
+      setUnit(ingredient?.unit ?? 'kg');
+      setStock('');
+      setMin(ingredient?.min ?? '');
+      setCost('');
+    }
+  }, [isOpen, ingredient]);
 
   const addedQty = parseFloat(stock) || 0;
 
-  const handleSave = () => {
-      if (!isEdit && (!stock || !name)) return;
-      const newStock = isEdit ? +(ingredient.stock + addedQty).toFixed(4) : addedQty;
-      
-      const dataToSave = isEdit 
-        ? {
-         
-            added_qty: addedQty,
-            minimum_stock: parseFloat(min),
-            total_cost: cost ? parseFloat(cost) : 0,
-          }
-        : {
-            name,
-            unit,
-            stock_quantity: newStock,
-            minimum_stock: parseFloat(min),
-            cost_per_unit: cost ? parseFloat(cost) / addedQty : 0,
-            category: 'Raw Material',
-          };
+  const handleSave = async () => {
+    // ─── ACTIVE FRONTEND ERROR VALIDATIONS ───
+    if (!isEdit) {
+      if (!name.trim()) {
+        showToast('Ingredient name is required.', 'error');
+        return;
+      }
+      if (!stock) {
+        showToast('Stock quantity is required.', 'error');
+        return;
+      }
+      if (parseFloat(stock) < 0) {
+        showToast('Stock quantity cannot be negative.', 'error');
+        return;
+      }
+    } else {
+      if (!stock) {
+        showToast('Added quantity is required.', 'error');
+        return;
+      }
+      if (addedQty <= 0) {
+        showToast('Added quantity must be greater than 0.', 'error');
+        return;
+      }
+    }
 
-      onSave(dataToSave, addedQty, isEdit ? 'Restocked item' : 'Initial stock entry');
-      onClose();
-    };
+    if (!min) {
+      showToast('Minimum safety stock is required.', 'error');
+      return;
+    }
+
+    const newStock = isEdit ? +(ingredient.stock + addedQty).toFixed(4) : addedQty;
+    
+    const dataToSave = isEdit 
+      ? {
+          added_qty: addedQty,
+          minimum_stock: parseFloat(min),
+          total_cost: cost ? parseFloat(cost) : 0,
+        }
+      : {
+          name: name.trim(),
+          unit,
+          stock_quantity: newStock,
+          minimum_stock: parseFloat(min),
+          cost_per_unit: cost ? parseFloat(cost) / addedQty : 0,
+          category: 'Raw Material',
+        };
+
+    try {
+      await onSave(dataToSave, addedQty, isEdit ? 'Restocked item' : 'Initial stock entry');
+      onClose(); // Isasara lang ang modal kapag matagumpay ang save!
+    } catch (err) {
+      return err;
+      // Hindi isasara ang modal kapag may error upang maitama ng user ang inputs
+    }
+  };
 
   return (
     <Modal
@@ -209,7 +255,8 @@ function IngredientModal({ isOpen, onClose, ingredient, onSave }) {
       footer={
         <div className="flex gap-3 justify-end">
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={handleSave} disabled={isEdit ? addedQty <= 0 : (!stock || !name)}>
+          {/* Button is ALWAYS enabled now to trigger proper error toast messages */}
+          <Button variant="primary" onClick={handleSave}>
             {isEdit ? 'Update Stock' : 'Save Ingredient'}
           </Button>
         </div>

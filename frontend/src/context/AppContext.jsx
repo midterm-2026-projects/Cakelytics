@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 // src/context/AppContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
-import { mockDB } from '../data/mockDatabase';
 
 export const formatPHP = (amount) => {
   return new Intl.NumberFormat('en-PH', {
@@ -32,7 +31,7 @@ export function AppProvider({ children }) {
   const [error,   setError]   = useState(null);
 
   // ── Network Fetch Loaders ──
-const fetchAll = async () => {
+  const fetchAll = async () => {
     setLoading(true);
     
     // Helper function para hindi mag-fail ang Promise.all kapag may error
@@ -88,19 +87,19 @@ const fetchAll = async () => {
         : recipe.products;
 
       return ({
-      id: recipe.id,
-      productId: recipe.product_id,
-      product: relatedProduct?.name || recipe.product_name || '',
-      estimatedCost: Number(recipe.estimated_cost ?? 0),
-      yield: Number(recipe.yield_quantity ?? 0),
-      yieldUnit: recipe.yield_unit || 'pcs',
-      ingredients: (recipe.recipe_ingredients || []).map(ri => ({
-        name: ri.item_name,
-        qty: Number(ri.quantity ?? 0),
-        unit: ri.unit,
-        itemType: ri.item_type,
-      })),
-    });
+        id: recipe.id,
+        productId: recipe.product_id,
+        product: relatedProduct?.name || recipe.product_name || '',
+        estimatedCost: Number(recipe.estimated_cost ?? 0),
+        yield: Number(recipe.yield_quantity ?? 0),
+        yieldUnit: recipe.yield_unit || 'pcs',
+        ingredients: (recipe.recipe_ingredients || []).map(ri => ({
+          name: ri.item_name,
+          qty: Number(ri.quantity ?? 0),
+          unit: ri.unit,
+          itemType: ri.item_type,
+        })),
+      });
     });
 
     const normalizedProducts = (prd.data || []).map(product => ({
@@ -143,7 +142,8 @@ const fetchAll = async () => {
 
     setLoading(false);
   };
-  // Initial fetch[cite: 10]
+
+  // Initial fetch
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -155,7 +155,8 @@ const fetchAll = async () => {
   // ── Product actions ────
   const addProduct = async () => {};
   const updateProduct = async (id, data) => { 
-    await fetch(`${BASE_URL}/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await fetch(`${BASE_URL}/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update product'); }
     await fetchAll(); 
   };
   const deleteProduct = async () => {};
@@ -168,49 +169,63 @@ const fetchAll = async () => {
 
   // ── Ingredient actions ────
   const addIngredient = async (data) => {
-    await fetch(`${BASE_URL}/ingredients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await fetch(`${BASE_URL}/ingredients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to add ingredient'); }
     await fetchAll();
   };
   const updateIngredient = async (id, data) => {
-    await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update ingredient'); }
     await fetchAll();
   };
   const deleteIngredient = async (id) => {
-    await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'DELETE' });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete ingredient'); }
     await fetchAll();
   };
   const restockIngredient = async (id, data) => {
-    await fetch(`${BASE_URL}/ingredients/${id}/restock`, { 
+    const res = await fetch(`${BASE_URL}/ingredients/${id}/restock`, { 
       method: 'PATCH', 
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify(data) 
     });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to restock ingredient'); }
     await fetchAll();
   };
 
   // ── Material actions ────
   const addMaterial = async (data) => {
-    await fetch(`${BASE_URL}/materials`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await fetch(`${BASE_URL}/materials`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to add material'); }
     await fetchAll();
   };
   const updateMaterial = async (id, data) => {
-    await fetch(`${BASE_URL}/materials/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await fetch(`${BASE_URL}/materials/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update material'); }
     await fetchAll();
   };
   const deleteMaterial = async (id) => {
-    await fetch(`${BASE_URL}/materials/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${BASE_URL}/materials/${id}`, { method: 'DELETE' });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete material'); }
     await fetchAll();
   };
+// Sa AppContext.jsx, sa restockMaterial function
   const restockMaterial = async (id, data) => {
-    await fetch(`${BASE_URL}/materials/${id}/restock`, { 
+    console.log("FETCHING URL:", `${BASE_URL}/materials/${id}/restock`);
+    const res = await fetch(`${BASE_URL}/materials/${id}/restock`, { 
       method: 'PATCH', 
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify(data) 
     });
-    await fetchAll();
-  };
+  
+  // DAGDAG ITO:
+  const responseData = await res.json().catch(() => ({}));
+  console.log("RESTOCK RESPONSE:", res.ok, responseData);
+  
+  if (!res.ok) { throw new Error(responseData.message || 'Failed to restock'); }
+  await fetchAll();
+};
 
-  // ── Recipe actions ────
   // ── Recipe actions ────
   const addRecipe = async (data) => {
     const res = await fetch(`${BASE_URL}/recipes`, { 
@@ -233,17 +248,18 @@ const fetchAll = async () => {
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify(data) 
     });
-    if (!res.ok) throw new Error('Failed to update recipe');
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update recipe'); }
     await fetchAll();
   };
   const deleteRecipe = async (id) => {
-    await fetch(`${BASE_URL}/recipes/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${BASE_URL}/recipes/${id}`, { method: 'DELETE' });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete recipe'); }
     await fetchAll();
   };
 
   // ── Batch production ────
   const confirmBatch = async (payload) => {
-    await fetch(`${BASE_URL}/production`, {
+    const res = await fetch(`${BASE_URL}/production`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -256,21 +272,24 @@ const fetchAll = async () => {
         notes: payload.notes || '',
       }),
     });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to confirm batch production'); }
     await fetchAll();
   };
 
   // ── Waste ────
   const logWaste = async (data) => {
-    await fetch(`${BASE_URL}/waste`, { 
+    const res = await fetch(`${BASE_URL}/waste`, { 
       method: 'POST', 
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify(data) 
     });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to log waste'); }
     await fetchAll(); // Refresh data from DB
   };
   
   const deleteWasteLog = async (id) => {
-    await fetch(`${BASE_URL}/waste/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${BASE_URL}/waste/${id}`, { method: 'DELETE' });
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete waste log'); }
     await fetchAll(); // Refresh data from DB
   };
 
@@ -295,4 +314,4 @@ export const useApp = () => {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp must be used within AppProvider');
   return ctx;
-};  
+};

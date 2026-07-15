@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Idagdag ang useEffect
 import { Plus, Search } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useToast, Button, Modal, Input, Select, Table, Tr, Td, Pagination, Badge, Card, LevelBar, ConfirmModal } from '../../components/ui';
@@ -30,22 +30,36 @@ export default function CelebrationTab() {
   );
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const handleSave = (data, addedQty = 0, note = '') => {
-      if (editMat?.id) {
-        if (restockMaterial) restockMaterial(editMat.id, data);
-        showToast(`+${addedQty} ${editMat.unit} na-add sa ${editMat.name}.`);
-      } else {
-        if (addMaterial) addMaterial(data);
-        showToast('Celebration material added.');
-      }
-      setModalOpen(false);
-    };
+// Sa CelebrationTab.jsx
+// Sa CelebrationTab.jsx
+const handleSave = async (data, addedQty = 0, note = '') => {
+  try {
+    if (editMat?.id) {
+      // Dito dapat may AWAIT
+      await restockMaterial(editMat.id, data); 
+      showToast(`+${addedQty} ${editMat.unit} na-add sa ${editMat.name}.`);
+    } else {
+      // Dito dapat may AWAIT
+      await addMaterial(data); 
+      showToast('Celebration material added.');
+    }
+    // Isasara lang ang modal pagkatapos ng matagumpay na API call
+    setModalOpen(false); 
+  } catch (err) {
+    showToast(err.message || 'Failed to save', 'error');
+  }
+};
 
-  const handleDelete = () => {
-    if (deleteMaterial) deleteMaterial(deleteTarget.id);
+const handleDelete = async () => {
+  try {
+    if (deleteMaterial) await deleteMaterial(deleteTarget.id);
     showToast(`${deleteTarget.name} deleted.`, 'warning');
+  } catch (err) {
+    showToast(err.message || 'Failed to delete material', 'error');
+  } finally {
     setDeleteTarget(null);
-  };
+  }
+};
 
   return (
     <div className="space-y-5">
@@ -158,61 +172,61 @@ export default function CelebrationTab() {
 }
 
 function MaterialModal({ isOpen, onClose, material, onSave }) {
-  const [name, setName]   = useState('');
-  const [unit, setUnit]   = useState('pcs');
+  const { show: showToast } = useToast();
+  const [name, setName] = useState('');
+  const [unit, setUnit] = useState('pcs');
   const [stock, setStock] = useState('');
-  const [min, setMin]     = useState(material?.min ?? '');
-  const [cost, setCost]   = useState('');
-  
+  const [min, setMin] = useState(material?.min ?? '');
+  const [cost, setCost] = useState('');
   const isEdit = !!material?.id;
 
-  useState(() => {
-    setName('');
-    setUnit('pcs');
-    setStock('');
-    setMin(material?.min ?? '');
-    setCost('');
-  });
+  useEffect(() => {
+    if (isOpen) {
+      setName(material?.name ?? '');
+      setUnit(material?.unit ?? 'pcs');
+      setStock('');
+      setMin(material?.min ?? '');
+      setCost('');
+    }
+  }, [isOpen, material]);
 
   const addedQty = parseFloat(stock) || 0;
 
-  const handleSave = () => {
-      if (!isEdit && (!stock || !name)) return;
-      const newStock = isEdit ? +(material.stock + addedQty).toFixed(4) : addedQty;
-      
-      const dataToSave = isEdit 
-        ? {
-            added_qty: addedQty,
-            minimum_stock: parseFloat(min),
-            total_cost: cost ? parseFloat(cost) : 0,
-          }
-        : {
-            name,
-            unit,
-            stock_quantity: newStock,
-            minimum_stock: parseFloat(min),
-            cost_per_unit: cost ? parseFloat(cost) / addedQty : 0,
-            category: 'Celebration Material',
-          };
+  const handleSave = async () => { // Gawing ASYNC[cite: 9]
+    if (!isEdit) {
+      if (!name.trim()) { showToast('Material name is required.', 'error'); return; }
+      if (!stock) { showToast('Initial stock is required.', 'error'); return; }
+      if (parseFloat(stock) < 0) { showToast('Stock quantity cannot be negative.', 'error'); return; }
+    } else {
+      if (!stock) { showToast('Added quantity is required.', 'error'); return; }
+      if (addedQty <= 0) { showToast('Added quantity must be greater than 0.', 'error'); return; }
+    }
 
-      onSave(dataToSave, addedQty, isEdit ? 'Stock added' : 'Initial stock');
-      onClose();
+    if (!min) { showToast('Minimum safety stock is required.', 'error'); return; }
+
+    const newStock = isEdit ? +(material.stock + addedQty).toFixed(4) : addedQty;
+
+    const dataToSave = isEdit 
+      ? { added_qty: addedQty, minimum_stock: parseFloat(min), total_cost: cost ? parseFloat(cost) : 0 }
+      : { name: name.trim(), unit, stock_quantity: newStock, minimum_stock: parseFloat(min), cost_per_unit: cost ? parseFloat(cost) / addedQty : 0, category: 'Celebration Material' };
+
+    // Dito dapat i-await ang onSave[cite: 9]
+    await onSave(dataToSave, addedQty, isEdit ? 'Stock added' : 'Initial stock');
+    
+    // Isara lang ang modal pagkatapos mag-await[cite: 9]
+    onClose();
     };
 
   return (
-    <Modal
-      isOpen={isOpen} onClose={onClose}
-      title={isEdit ? `Add Stock — ${material?.name}` : 'Add New Celebration Material'}
-      subtitle={isEdit ? `Unit: ${material?.unit} · Current: ${material?.stock}` : 'I-record ang mga bagong materials kagaya ng Tarpaulin at Balloons.'}
-      size="md"
+<Modal isOpen={isOpen} onClose={onClose} title={isEdit ? `Add Stock — ${material?.name}` : 'Add New Celebration Material'} size="md"
       footer={
         <div className="flex gap-3 justify-end">
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={handleSave} disabled={isEdit ? addedQty <= 0 : (!stock || !name)}>
+          <Button variant="primary" onClick={handleSave}>
             {isEdit ? 'Add Stock' : 'Save Material'}
           </Button>
         </div>
-      }
+}
     >
       <div className="space-y-4">
         {!isEdit && (
