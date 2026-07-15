@@ -1,5 +1,8 @@
+// ============================================================
+// PerformancetTimeframeHelper.utils.js
 // Tumutugma ito sa mga options ng performanceTimeframe.jsx
 // Ginagamit ng FourKPI, StackedBar, at TopProducts model
+// ============================================================
 
 const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const endOfDay = (d) => { const x = new Date(d); x.setHours(23, 59, 59, 999); return x; };
@@ -23,10 +26,13 @@ const getDateRange = (period) => {
       return { startDate: startOfDay(start).toISOString(), endDate: endOfDay(now).toISOString() };
     }
 
-    case 'Last 30 Days': {
-      const start = new Date(now);
-      start.setDate(start.getDate() - 29);
-      return { startDate: startOfDay(start).toISOString(), endDate: endOfDay(now).toISOString() };
+    // PINALITAN: Naging 'Last Month' na imbis na Last 30 Days
+    case 'Last Month': {
+      // Unang araw ng nakaraang buwan
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      // Huling araw ng nakaraang buwan (day 0 ng current month)
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+      return { startDate: startOfDay(start).toISOString(), endDate: endOfDay(end).toISOString() };
     }
 
     case 'This Month': {
@@ -40,12 +46,12 @@ const getDateRange = (period) => {
     }
 
     default: {
-      // Custom range mula sa "YYYY-MM-DD - YYYY-MM-DD" (galing sa Custom Range... option)
+      // Custom range mula sa "YYYY-MM-DD - YYYY-MM-DD"
       if (period && period.includes(' - ')) {
         const [s, e] = period.split(' - ');
         return { startDate: startOfDay(new Date(s)).toISOString(), endDate: endOfDay(new Date(e)).toISOString() };
       }
-      // Fallback: Last 7 Days
+      // Fallback
       const start = new Date(now);
       start.setDate(start.getDate() - 6);
       return { startDate: startOfDay(start).toISOString(), endDate: endOfDay(now).toISOString() };
