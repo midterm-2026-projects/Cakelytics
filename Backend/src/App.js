@@ -9,6 +9,8 @@ const recipeRoutes = require('./routes/inventory/recipe.routes.js');
 const productionRoutes = require('./routes/inventory/production.routes.js');
 const wasteRoutes = require('./routes/inventory/waste.routes.js');
 
+const analyticsRoutes = require('./routes/analytics.routes.js');
+
 const { errorHandler } = require('./middleware/errorHandler.js');
 const { authMiddlewareJwt } = require('./middleware/auth.middleware.js');
 
@@ -44,6 +46,8 @@ app.use('/api/inventory/products', productRoutes);
 app.use('/api/inventory/recipes', recipeRoutes);
 app.use('/api/inventory/production', productionRoutes);
 app.use('/api/inventory/waste', wasteRoutes);
+
+app.use('/api/analytics', analyticsRoutes);
 
 app.use(errorHandler);
 
