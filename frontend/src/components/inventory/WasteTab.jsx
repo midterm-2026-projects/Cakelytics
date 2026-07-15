@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { AlertTriangle, Search, Filter, Plus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { useToast, Button, Modal, Input, Select, Textarea, Table, Tr, Td, Pagination, Badge, Card } from '../ui';
+import { useToast, Button, Modal, Input, Select, Textarea, Table, Tr, Td, Pagination, Badge, Card } from '../../components/ui';
 
 const PER_PAGE = 10;
 
@@ -85,29 +85,16 @@ export default function WasteTab() {
   };
 
   const handleLog = async () => {
-      let selectedItemStock = 0;
-    
-    if (logType === 'ingredient') {
-       const match = ingredients.find(i => i.name === ingName);
-       selectedItemStock = match ? match.stock : 0;
-    } else if (logType === 'product') {
-       const match = products.find(p => p.name === productName);
-       selectedItemStock = match ? match.stock : 0;
-    } else if (logType === 'material') {
-       const match = materials.find(m => m.name === matName);
-       selectedItemStock = match ? match.stock : 0;
-    }
-
-    const inputQty = Number(logType === 'product' ? productQty : logType === 'ingredient' ? ingQty : matQty);
-    
-    if (inputQty > selectedItemStock) {
-      showToast(`Hindi sapat ang stock! Mayroon ka na lamang ${selectedItemStock} na natitira para dito.`, 'error');
-      return; 
-    }
+    // FIX: required-field validation now runs BEFORE the stock-sufficiency
+    // check (per logType). Previously the stock check ran first and, when
+    // no item was selected, `selectedItemStock` defaulted to 0 — so any
+    // positive qty always tripped "Hindi sapat ang stock!" instead of the
+    // intended "Mangyaring punan..." missing-field message.
     let finalItem = '';
     let rawQty = 0;
     let computedCost = 0;
-    let finalUnit = ''; 
+    let finalUnit = '';
+    let selectedItemStock = 0;
 
     if (logType === 'ingredient') {
       if (!ingName || !ingQty) {
@@ -115,6 +102,7 @@ export default function WasteTab() {
         return;
       }
       const match = ingredients.find(i => i.name === ingName);
+      selectedItemStock = match ? match.stock : 0;
       finalItem = ingName;
       rawQty = parseFloat(ingQty);
       finalUnit = match?.unit || ingUnit;
@@ -125,10 +113,11 @@ export default function WasteTab() {
         return;
       }
       const match = products.find(p => p.name === productName);
+      selectedItemStock = match ? match.stock : 0;
       finalItem = productName;
       rawQty = parseInt(productQty, 10);
       finalUnit = productUnit;
-      const matchCost = match?.estimatedCost || 45; 
+      const matchCost = match?.estimatedCost || 45;
       computedCost = matchCost * rawQty;
     } else if (logType === 'material') {
       if (!matName || !matQty) {
@@ -136,10 +125,16 @@ export default function WasteTab() {
         return;
       }
       const match = materials.find(m => m.name === matName);
+      selectedItemStock = match ? match.stock : 0;
       finalItem = matName;
       rawQty = parseFloat(matQty);
       finalUnit = match?.unit || matUnit;
       computedCost = (match?.costPerUnit || 0) * rawQty;
+    }
+
+    if (rawQty > selectedItemStock) {
+      showToast(`Hindi sapat ang stock! Mayroon ka na lamang ${selectedItemStock} na natitira para dito.`, 'error');
+      return;
     }
 
     const backendPayload = {
