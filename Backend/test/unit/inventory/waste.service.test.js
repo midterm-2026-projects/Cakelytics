@@ -1,8 +1,8 @@
-const { WasteModel } = require('../../../src/model/inventory/waste.model.js');
-const { IngredientModel } = require('../../../src/model/inventory/ingredient.model.js');
-const { MaterialModel } = require('../../../src/model/inventory/material.model.js');
-const { InventoryLogModel } = require('../../../src/model/inventory/inventoryLog.model.js');
-const { WasteService } = require('../../../src/services/inventory/waste.service.js');
+const { WasteModel } = require('../../../src/model/waste.model.js');
+const { IngredientModel } = require('../../../src/model/ingredient.model.js');
+const { MaterialModel } = require('../../../src/model/material.model.js');
+const { InventoryLogModel } = require('../../../src/model/inventoryLog.model.js');
+const { WasteService } = require('../../../src/services/inventory.service.js');
 
 WasteModel.findAll           = vi.fn();
 WasteModel.create            = vi.fn();

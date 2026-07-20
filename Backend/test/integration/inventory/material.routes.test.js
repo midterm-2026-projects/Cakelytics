@@ -2,8 +2,8 @@ require('dotenv').config();
 const request = require('supertest');
 const express = require('express');
 
-const { MaterialService } = require('../../../src/services/inventory/material.service.js');
-const materialRoutes = require('../../../src/routes/inventory/material.routes.js');
+const { MaterialService } = require('../../../src/services/inventory.service.js');
+const materialRoutes = require('../../../src/routes/inventory.routes.js');
 const { errorHandler } = require('../../../src/middleware/errorHandler.js');
 
 const fakeAuth = (req, res, next) => {
@@ -16,7 +16,7 @@ const fakeAuth = (req, res, next) => {
 
 const app = express();
 app.use(express.json());
-app.use('/api/inventory/materials', fakeAuth, materialRoutes);
+app.use('/api/inventory', fakeAuth, materialRoutes);
 app.use(errorHandler);
 
 describe('Material Routes Integration', () => {

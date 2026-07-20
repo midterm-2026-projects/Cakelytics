@@ -5,7 +5,7 @@ vi.mock('../../../src/config/supabase.js', () => ({
 }));
 
 const { supabase } = require('../../../src/config/supabase.js');
-const { WasteModel } = require('../../../src/model/inventory/waste.model.js');
+const { WasteModel } = require('../../../src/model/waste.model.js');
 
 describe('WasteModel', () => {
   let chain;

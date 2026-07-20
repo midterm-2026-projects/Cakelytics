@@ -2,8 +2,8 @@ require('dotenv').config();
 const request = require('supertest');
 const express = require('express');
 
-const { IngredientService } = require('../../../src/services/inventory/ingredient.service.js');
-const ingredientRoutes = require('../../../src/routes/inventory/ingredient.routes.js');
+const { IngredientService } = require('../../../src/services/inventory.service.js');
+const ingredientRoutes = require('../../../src/routes/inventory.routes.js');
 const { errorHandler } = require('../../../src/middleware/errorHandler.js');
 
 const fakeAuth = (req, res, next) => {
@@ -16,7 +16,7 @@ const fakeAuth = (req, res, next) => {
 
 const app = express();
 app.use(express.json());
-app.use('/api/inventory/ingredients', fakeAuth, ingredientRoutes);
+app.use('/api/inventory', fakeAuth, ingredientRoutes);
 app.use(errorHandler);
 
 describe('Ingredient Routes Integration', () => {

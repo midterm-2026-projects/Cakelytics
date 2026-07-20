@@ -2,8 +2,8 @@ require('dotenv').config();
 const request = require('supertest');
 const express = require('express');
 
-const { WasteService } = require('../../../src/services/inventory/waste.service.js');
-const wasteRoutes = require('../../../src/routes/inventory/waste.routes.js');
+const { WasteService } = require('../../../src/services/inventory.service.js');
+const wasteRoutes = require('../../../src/routes/inventory.routes.js');
 const { errorHandler } = require('../../../src/middleware/errorHandler.js');
 
 const fakeAuth = (req, res, next) => {
@@ -16,7 +16,7 @@ const fakeAuth = (req, res, next) => {
 
 const app = express();
 app.use(express.json());
-app.use('/api/inventory/waste', fakeAuth, wasteRoutes);
+app.use('/api/inventory', fakeAuth, wasteRoutes);
 app.use(errorHandler);
 
 describe('Waste Routes Integration', () => {
@@ -27,7 +27,7 @@ describe('Waste Routes Integration', () => {
     vi.spyOn(WasteService, 'log').mockResolvedValue({ id: 'w-2', item_name: 'Flour' });
   });
 
-  describe('GET /api/inventory/waste', () => {
+  describe('GET /api/inventory', () => {
     
     it('should return 401 when accessing without a valid token', async () => {
       const res = await request(app).get('/api/inventory/waste');
