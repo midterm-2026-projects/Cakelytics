@@ -1,7 +1,7 @@
-const { MaterialModel } = require('../../../src/model/inventory/material.model.js');
-const { MaterialService } = require('../../../src/services/inventory/material.service.js');
+const { MaterialModel } = require('../../../src/model/material.model.js');
+const { MaterialService } = require('../../../src/services/inventory.service.js');
 
-vi.mock('../../../src/model/inventory/inventoryLog.model.js', () => ({
+vi.mock('../../../src/model/inventoryLog.model.js', () => ({
   InventoryLogModel: { logHistory: vi.fn().mockResolvedValue({ error: null }) }
 }));
 

@@ -5,7 +5,7 @@ vi.mock('../../../src/config/supabase.js', () => ({
 }));
 
 const { supabase } = require('../../../src/config/supabase.js');
-const { RecipeModel } = require('../../../src/model/inventory/recipe.model.js');
+const { RecipeModel } = require('../../../src/model/recipe.model.js');
 
 describe('RecipeModel', () => {
   let chain;

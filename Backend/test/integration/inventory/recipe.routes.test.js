@@ -2,8 +2,8 @@ require('dotenv').config();
 const request = require('supertest');
 const express = require('express');
 
-const { RecipeService } = require('../../../src/services/inventory/recipe.service.js');
-const recipeRoutes = require('../../../src/routes/inventory/recipe.routes.js');
+const { RecipeService } = require('../../../src/services/inventory.service.js');
+const recipeRoutes = require('../../../src/routes/inventory.routes.js');
 const { errorHandler } = require('../../../src/middleware/errorHandler.js');
 
 
@@ -17,7 +17,7 @@ const fakeAuth = (req, res, next) => {
 
 const app = express();
 app.use(express.json());
-app.use('/api/inventory/recipes', fakeAuth, recipeRoutes);
+app.use('/api/inventory', fakeAuth, recipeRoutes);
 app.use(errorHandler);
 
 describe('Recipe Routes Integration', () => {
@@ -31,7 +31,7 @@ describe('Recipe Routes Integration', () => {
     vi.spyOn(RecipeService, 'delete').mockResolvedValue(null);
   });
 
-  describe('GET /api/inventory/recipes', () => {
+  describe('GET /api/inventory', () => {
     it('should return 401 when accessing without a valid token', async () => {
       const res = await request(app).get('/api/inventory/recipes');
       expect(res.status).toBe(401);
