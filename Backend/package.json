@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node src/Index.js",
     "dev": "nodemon src/Index.js",
-    "test": "vitest"
+    "test": "vitest",
+    "db:seed": "node seed.js"
   },
   "keywords": [],
   "author": "",
@@ -23,7 +24,8 @@
     "jsdom": "^29.1.1",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wait-on": "^9.0.10"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.0",

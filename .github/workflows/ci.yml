@@ -9,59 +9,107 @@ on:
 
 jobs:
 
-  backend-tests:
-    name: "Backend Tests"
-    runs-on: ubuntu-latest
+    backend-tests:
+        name: "Backend Tests"
+        runs-on: ubuntu-latest
+        defaults:
+          run:
+            working-directory: Backend
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
 
-    defaults:
-      run:
-        working-directory: Backend
+          - name: Set up Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: "22"
+              cache: "npm"
+              cache-dependency-path: Backend/package-lock.json
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+          - name: Install dependencies
+            run: npm ci
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: Backend/package-lock.json
+          # 👉 SEEDING STEP (Lilinisin ang Dummy DB bago mag-test)
+          - name: Seed / Reset Test Database
+                  # 👉 Hahatiin natin sa variables
+            env: 
+              SUPABASE_URL: "https://zpswednchfayyasdsfas.supabase.co"
+              KEY_PART_1: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpwc3dlZG5jaGZhe"
+              KEY_PART_2: "Xlhc2RzZmFzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzExNDE1OCwiZXhwIjoyMDk4NjkwMTU4fQ.deP3ZIlXuoP1XYLAftYEXzkgpd8lNBO5lk219w4oNYY"             # Ilagay dito ang ikalawang kalahati
+            
+            # 👉 Pagdudugtungin bago patakbuhin ang seed
+            run: |
+              export SUPABASE_SERVICE_ROLE_KEY="${KEY_PART_1}${KEY_PART_2}"
+              npm run db:seed
 
-      - name: Install dependencies
-        run: npm ci
+          # 👉 BACKEND TESTS STEP
+          - name: Run unit tests
+            run: npm test
+            env:
+              NODE_ENV: test
+              # ILAGAY ULIT DITO ANG KEYS
+              SUPABASE_URL: "https://zpswednchfayyasdsfas.supabase.co"
+              SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpwc3dlZG5jaGZheXlhc2RzZmFzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzExNDE1OCwiZXhwIjoyMDk4NjkwMTU4fQ.deP3ZIlXuoP1XYLAftYEXzkgpd8lNBO5lk219w4oNYY"
+              JWT_SECRET: "fake-secret-for-testing"
+              
+    frontend-tests:
+              name: "Frontend Tests"
+              runs-on: ubuntu-latest
+              needs: backend-tests
+              env:
+                BACKEND_PORT: 3000
+              steps:
+                - name: Checkout code
+                  uses: actions/checkout@v4
 
-      - name: Run unit tests
-        run: npm test
-        env:
-          NODE_ENV: test
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ vars.SUPABASE_ANON_KEY }}
-          # Idagdag mo itong linya na 'to:
-          JWT_SECRET: "fake-secret-for-testing"
+                - name: Set up Node.js
+                  uses: actions/setup-node@v4
+                  with:
+                    node-version: "22"
+                    cache: "npm"
+                    cache-dependency-path: Backend/package-lock.json
 
+                - name: Install backend dependencies
+                  working-directory: Backend
+                  run: npm ci
 
-  frontend-tests:
-    name: "Frontend Tests"
-    runs-on: ubuntu-latest
+                - name: Start backend server
+                  working-directory: Backend
+                  run: npm run dev > backend.log 2>&1 &
+                  env:
+                    NODE_ENV: test
+                    PORT: ${{ env.BACKEND_PORT }}
+                    SUPABASE_URL: "https://zpswednchfayyasdsfas.supabase.co"
+                    SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpwc3dlZG5jaGZheXlhc2RzZmFzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzExNDE1OCwiZXhwIjoyMDk4NjkwMTU4fQ.deP3ZIlXuoP1XYLAftYEXzkgpd8lNBO5lk219w4oNYY"
+                    JWT_SECRET: "fake-secret-for-testing"
 
-    defaults:
-      run:
-        working-directory: frontend
+                - name: Wait for backend to be ready
+                  run: npx wait-on http://localhost:${{ env.BACKEND_PORT }} --timeout 30000
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+                - name: Show backend log if failed
+                  if: failure()
+                  working-directory: Backend
+                  run: cat backend.log
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+                - name: Install frontend dependencies
+                  working-directory: frontend
+                  run: npm ci
 
-      - name: Install dependencies
-        run: npm ci
+                - name: Install Playwright Browsers
+                  working-directory: frontend
+                  run: npx playwright install chromium --with-deps
 
-      - name: Run unit tests
-        run: npm test
+                - name: Run unit and integration tests
+                  working-directory: frontend
+                  run: npm test
+
+                - name: Run E2E tests
+                  working-directory: frontend
+                  run: |
+                    npm run dev &
+                    npx wait-on http-get://localhost:5173
+                    npx wait-on http://localhost:${{ env.BACKEND_PORT }}/api/health --timeout 30000
+                    npx playwright test --project=chromium
+                  env:
+                    APP_URL: "http://localhost:5173"
+                    VITE_API_URL: "http://localhost:${{ env.BACKEND_PORT }}/api"
