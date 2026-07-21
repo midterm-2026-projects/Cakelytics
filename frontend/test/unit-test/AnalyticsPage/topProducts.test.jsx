@@ -5,21 +5,28 @@ import TopProductsList from '../../../src/components/Analytics/topProducts';
 
 describe('TopProductsList', () => {
   it('should display only the top 5 products', () => {
-    // Render the component directly (it defaults to 'Last 7 Days')
-    render(<TopProductsList />);
+    // 1. Gumawa ng mock data na kailangan ng component
+    const mockData = [
+      { name: 'Package B', sold: 50 },
+      { name: 'Package A', sold: 45 },
+      { name: 'Ensaymada', sold: 40 },
+      { name: 'Cupcake', sold: 35 },
+      { name: 'Brownies', sold: 30 }
+    ];
 
-    // Check for the actual default items from your component's internal data
+    // 2. I-pass ang mock data sa prop
+    render(<TopProductsList data={mockData} />);
+
+    // Ngayon, mahahanap na ng test ang mga elements na ito
     expect(screen.getByText('Package B')).toBeInTheDocument();
     expect(screen.getByText('Package A')).toBeInTheDocument();
     expect(screen.getByText('Ensaymada')).toBeInTheDocument();
     expect(screen.getByText('Cupcake')).toBeInTheDocument();
     expect(screen.getByText('Brownies')).toBeInTheDocument();
-
   });
 
   it('should render the empty state when no data is available', () => {
-    // Force the component to slice 0 items to trigger the empty state screen
-    render(<TopProductsList maxItems={0} />);
+    render(<TopProductsList data={[]} />); // Siguraduhing empty array ang data
 
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(

@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import StackedBar from '../../../src/components/Analytics/stackedBar';
 
 // ─── Mock data ───────────────────────────────────────────────────────
-// Inayos ang format para maging Array of Objects (ito ang hinihingi ng Recharts)
 const mockTrend = [
   { label: 'Mon', Sales: 20000, Expenses: 12000 },
   { label: 'Tue', Sales: 22000, Expenses: 13000 },
@@ -19,9 +18,10 @@ describe('Performance Trend Bar Chart Component ', () => {
     expect(screen.getByRole('heading', { name: /performance trend/i })).toBeInTheDocument();
     expect(screen.getByText(/· Month/i)).toBeInTheDocument();
 
-    expect(screen.getByText('Total Sales')).toBeInTheDocument();
-    expect(screen.getAllByText('Expenses').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Profit').length).toBeGreaterThan(0);
+    // Tinanggal ang expectation para sa "Total Sales" dahil nasa loob ito ng Tooltip.
+    // Titingnan na lang natin ang legends sa header na palaging naka-render.
+    expect(screen.getAllByText(/Expenses/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Profit/i).length).toBeGreaterThan(0);
   });
 
 });

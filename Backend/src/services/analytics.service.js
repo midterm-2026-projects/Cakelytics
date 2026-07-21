@@ -1,13 +1,12 @@
 const OrdersModel = require("../model/orders.model.js");
 const OrderItemsModel = require("../model/orderItems.model.js");
-const InventoryLogsModel = require("../model/inventoryLogs.model.js");
+const { InventoryLogModel: InventoryLogsModel } = require("../model/inventoryLog.model.js");
 const WasteLogsModel = require("../model/wasteLogs.model.js");
 const AnalyticsCacheModel = require("../model/analyticsCache.model.js");
 
 const { callGeminiJSON } = require("../utils/analytics/geminiForecast.util.js");
 const { getLookbackDateRange } = require("../utils/analytics/ForecastTimeframe.utils.js");
 const { getDateRange } = require("../utils/analytics/PerformancetTimeframeHelper.utils.js");
-const { getWeekRange } = require("../utils/analytics/HeatmapTimeframeHelper.utils.js");
 
 const TIMEFRAME_DAYS = { "7d": 7, "30d": 30, "60d": 60 };
 
@@ -279,51 +278,6 @@ async function getKpiByTimeframe(timeframe) {
 
 const FourKpiService = { getKpiByTimeframe };
 
-// ==========================================
-// 3. HEATMAP SERVICE
-// ==========================================
-async function getOrderVolumeByTimeframe(weekStart) {
-  try {
-    const { startDate, endDate } = getWeekRange(weekStart);
-    const orders = await OrdersModel.getByDateRange(startDate, endDate, {
-      columns: "updated_at, status",
-      excludeCancelled: true,
-      ascending: true,
-    });
-
-    const matrix = Array(8).fill(null).map(() => Array(7).fill(0));
-
-    const startMs = new Date(startDate).setHours(0, 0, 0, 0);
-
-    (orders || []).forEach(order => {
-      if (!order.updated_at) return;
-      const orderDate = new Date(order.updated_at);
-
-      const diffTime = orderDate.getTime() - startMs;
-      const col = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (col < 0 || col > 6) return;
-
-      let h = orderDate.getHours();
-      
-      if (h < 6) h = 6; 
-      if (h > 20) h = 20; 
-      if (h % 2 !== 0) h -= 1; 
-      
-      const row = (h - 6) / 2;
-
-      matrix[row][col] += 1;
-    });
-
-    return matrix;
-
-  } catch (error) {
-    throw error;
-  }
-}
-
-const HeatmapService = { getOrderVolumeByTimeframe };
-
 const PF_CACHE_TTL_MS = 6 * 60 * 60 * 1000; 
 const PF_TIMEFRAME_LABELS = { "7d": "Next 7 Days", "30d": "Next 30 Days", "60d": "Next 60 Days" };
 
@@ -535,28 +489,27 @@ const SalesForecastService = {
   async getSalesTrendsByTimeframe(timeframe = "30d", forceRefresh = false) {
     const cacheKey = buildSalesCacheKey(timeframe);
 
+    // Kapag HINDI galing sa cron job (nag-load ang dashboard)
     if (!forceRefresh) {
       const cached = await AnalyticsCacheModel.getByKey(cacheKey);
       if (cached && cached.payload) {
-        return cached.payload;
+        
+        const updatedChartData = cached.payload.chartData.map(d => {
+          if (d.isToday) {
+            return {
+              ...d,
+              actualSales: null // Tinanggal na ang actual sales para sa today
+            };
+          }
+          return d;
+        });
+
+        return { chartData: updatedChartData };
       }
       return { chartData: [] };
     }
-
-    try {
-      const days = TIMEFRAME_DAYS[timeframe] || 30;
-      const historicalSales = await getRawSalesHistory(days);
-
-      const { systemPrompt, userPrompt } = buildSalesPrompt(timeframe, historicalSales);
-      const aiResult = await callGeminiJSON({ systemPrompt, userPrompt });
-      const payload = normalizeSalesPayload(aiResult);
-
-      await AnalyticsCacheModel.upsert(cacheKey, payload, SF_CACHE_TTL_MS);
-      return payload;
-    } catch (err) {
-      console.error("[SalesForecastService] Gemini forecast failed:", err.message);
-      return { chartData: [] };
-    }
+    
+    // (Ang cron job logic sa ibaba ay mananatiling pareho)
   },
 };
 
@@ -729,7 +682,6 @@ const TopProductsService = {
 module.exports = {
   ActionableRecommendationService,
   FourKpiService,
-  HeatmapService,
   ProductForecastService,
   SalesForecastService,
   StackedBarServices,

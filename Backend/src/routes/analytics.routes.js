@@ -4,7 +4,6 @@ const router = require('express').Router();
 const {
   ActionableRecommendationController,
   FourKpiController,
-  HeatmapController,
   ProductForecastController,
   SalesForecastController,
   StackedBarController,
@@ -20,9 +19,6 @@ router.get('/actionable-recommendations', ActionableRecommendationController.get
 
 // Four KPI
 router.get('/four-kpi/:timeframe', FourKpiController.getKpiByTimeframe);
-
-// Heatmap
-router.get('/heatmap/:timeframe', HeatmapController.getHeatmapData);
 
 // Product Forecast
 router.get('/product-forecast/:timeframe', ProductForecastController.getProductForecastByTimeframe);

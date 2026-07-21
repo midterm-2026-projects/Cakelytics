@@ -1,135 +1,154 @@
 # Sales and POS Management Module
 
-## Objective
-This project focuses on developing a **Sales and Point of Sale (POS) Management Module** for **Aileen and Niculus Bake Shop**. The module enables business owners to manage daily sales operations efficiently by providing functionalities such as product viewing, cart management, payment processing, order monitoring, sales tracking, and sales record generation.
+## Project Overview
+
+This repository contains the development of the **Sales and POS Management Module** for the **Aileen and Niculus Bake Shop Online Ordering System**. The module enables product browsing, order management, payment processing, inventory synchronization, and sales monitoring through an integrated frontend and backend architecture.
 
 ---
 
-## Features
-
-### Product Management
-* Display available bakery products
-* Product search functionality
-* Product category filtering
-* Product details viewing
-
-### Cart Management
-* Add products to cart
-* Update product quantities
-* Remove products from cart
-* Display cart summary and totals
-
-### Order Management
-* Monitor walk-in and online orders
-* View order details
-* Filter and search orders
-* Update order status
-
-### Payment Processing
-* Validate customer payments
-* Compute customer change
-* Generate payment records
-* Save transaction information
-
-### Sales Tracking
-* Store sales records
-* Generate transaction history
-* Monitor completed sales
-
-### System Integration
-* Frontend and backend integration
-* Product data synchronization
-* Order transaction verification
-* End-to-end sales transaction workflow
-
----
-
-## Technology Stack
-
-### Frontend
-* React.js
-* Vite
-* Tailwind CSS
-
-### Backend
-* Node.js
-* Express.js
-
-### Database
-* MySQL
-
-### Testing
-* Vitest
-* React Testing Library
-
----
-
-## Development Timeline
+## Development Timeline & Progress
 
 ### Week 1
-**Day 1 – POS Product Listing Interface Design**
-*   **Sub-Tasks:** Design POS product listing layout, create product card component, create search bar and product category filter UI, design product details display.
-*   **Deliverables:** Product listing page UI, product card component, search bar and category filter component, product details section.
+
+* **Day 1 – POS Product Listing Interface Design**
+* **Tasks:** Design POS product listing layout, create Product Card component, create Search Bar component, create Product Category Filter UI, design Product Details display.
+* **Deliverables:** POS Product Listing Page, Product Card Component, Search Bar Component, Category Filter Component, Product Details Section.
+* **Test Cases:** Render Point of Sale title, display user initials, toggle notification badge based on count, format current date/time, display products and categories, highlight active category, handle `setActiveCategory`, render search input, handle `searchTerm`, and display product attributes (name, stock status, description, price).
+
+
 
 ### Week 2
-**Day 1 – Cart Management Interface Design**
-*   **Sub-Tasks:** Design cart panel layout, create add-to-cart button UI, design quantity control component, design cart summary section.
-*   **Deliverables:** Cart interface UI, add-to-cart component, quantity control component, cart summary display.
 
-**Day 2 – Orders Monitoring Interface Design**
-*   **Sub-Tasks:** Design orders table layout, create order status display component, create search bar and order filter controls UI, design order details modal/page.
-*   **Deliverables:** Orders table page UI, status display component, order filter component and search bar, order details view.
+* **Day 1 – Cart Management Interface Design**
+* **Tasks:** Design cart panel layout, create Add-to-Cart button, design Quantity Control component, design Cart Summary section.
+* **Deliverables:** Cart Interface, Add-to-Cart Component, Quantity Controls, Cart Summary.
+* **Test Cases:** Verify empty/populated cart layouts, verify sidebar sections (Current Order, Pre-order, Item List, Subtotal, Grand Total), check Add button role and clickability, test `"+"`, `"-"`, and `updateQuantity()` handlers, and verify calculations for Subtotal, Additional Fee, Discount, and Grand Total.
+
+
+* **Day 2 – Orders Monitoring Interface Design**
+* **Tasks:** Design Orders Table, create Status Display Component, create Search Bar, create Filter Controls, design Order Details Modal.
+* **Deliverables:** Orders Table, Status Component, Search Bar, Filter Controls, Order Details View.
+* **Test Cases:** Verify Orders Table rendering, display Order IDs, check order list interactions, display status component, verify search and pagination via test files, and verify `onViewDetails()` execution.
+
+
 
 ### Week 3
-**Day 1 –  Adding Model & Services and Design Product Management Interface**
-*   **Sub-Tasks:** 
-    * Create order model, product model, and sales model
-    * Create order, product, and sales services
-    * Design product CRUD (Create, Read, Update, Delete) layouts
-    * Create product input forms for adding/editing items
-    * Design product management dashboard table with edit/delete actions
-*   **Deliverables:** 
-    * Order, Product, and Sales models/services
-    * High-density table component to list products
-    * Product Form (Add/Edit)
-    * Table columns: Product Name, Category, Stock Level, Price, and Actions (Edit/Delete)
 
-**Day 2 – Product and Cart Backend Integration**
-*   **Sub-Tasks:** Retrieve products from database, implement add-to-cart functionality, implement quantity update logic, calculate cart totals.
-*   **Deliverables:** Product retrieval functionality, add-to-cart feature, quantity management logic, cart total computation.
+* **Day 1 – Models, Services and Product Management Interface**
+* **Tasks:**
+* *Backend:* Configure database connection and environment variables; create Order, Product, and Sales Models; create Order, Product, and Sales Services.
+* *Frontend:* Design Product CRUD Layout, create Product Form, design Product Management Table.
+
+
+* **Deliverables:** Database Connection, Environment Configuration, Models, Services, Product Management Page, Product Form, Dashboard Table.
+* **Test Cases:** Verify database connection, environment loading, unit tests for models and services, product management page loading, CRUD interface workflow, input validation on forms, submit/cancel functionality, dashboard table rendering, and edit/delete actions (form opening and confirmation dialogs).
+
+
+* **Day 2 – Product and Cart Backend Integration**
+* **Tasks:** Retrieve products from database, add products to cart, update cart quantities, compute totals.
+* **Deliverables:** Product Retrieval, Add-to-Cart, Quantity Management, Cart Total Computation.
+* **Test Cases:** Display products from database, add products successfully, update quantities correctly, and calculate totals accurately.
+
+
 
 ### Week 4
-**Day 1 – Order Storage and Management**
-*   **Sub-Tasks:** Save order information, store ordered items, generate order records.
-*   **Deliverables:** Order saving functionality, order item storage feature, sales transaction records, order status management.
 
-**Day 2 – Payment Processing Integration**
-*   **Sub-Tasks:** Validate payment amount, compute customer change, generate payment record.
-*   **Deliverables:** Payment validation module, change computation feature, payment records.
+* **Day 1 – Order Storage and Management**
+* **Tasks:** Save order information, store ordered items, generate order records.
+* **Deliverables:** Order Saving, Order Item Storage, Sales Transaction Records, Order Status Management.
+* **Test Cases:** Save order successfully, store ordered items, and retrieve order records.
+
+
+* **Day 2 – Payment Processing Integration (Products Edit/Delete)**
+* **Main Tasks:** Validate payment amount, compute customer change, generate payment record, update/delete products.
+* **Subtasks:**
+* *Payment Validation:* Validate cash payment, prevent payment lower than total, validate input format, handle empty inputs and invalid values.
+* *Change Computation:* Compute change automatically, update dynamically, display zero change when equal, prevent negative values.
+* *Payment Record Management:* Save payment to database, associate with order, generate unique reference, record timestamp, store payment method, update status.
+* *Product Edit/Delete Integration:* Update/delete products in database, refresh product lists/dashboard, display confirmation dialogs, prevent accidental deletion.
+
+
+* **Deliverables:** Payment Validation Module, Change Computation Feature, Payment Records, Product Edit/Delete Functions.
+* **Test Cases:** Validate payment amounts, compute customer change, store payment records, and successfully edit/delete products.
+
+
 
 ### Week 5
-**Day 1 – Order Status Monitoring Integration**
-*   **Sub-Tasks:** Display updated order statuses, implement status filtering, implement status updates.
-*   **Deliverables:** Order monitoring functionality, status update feature, status filter controls.
 
-**Day 2 – Data Validation and Error Handling**
-*   **Sub-Tasks:** Validate transaction inputs, handle invalid entries, prevent incomplete orders, display validation messages.
-*   **Deliverables:** Input validation rules, error handling mechanism, invalid transaction prevention, validation message component.
+* **Day 1 – Order Status Monitoring Integration**
+* **Tasks:** Display updated order statuses, implement status filtering, implement status updates.
+* **Deliverables:** Order Monitoring, Status Updates, Status Filter Controls.
+* **Test Cases:** Display updated statuses, filter orders successfully, and update order status records.
+
+
+* **Day 2 – POS Handlers and Index Integration**
+* **Main Tasks:** Validate transaction inputs, handle invalid entries, prevent incomplete orders, display validation messages, integrate POS handlers into index.
+* **Subtasks:**
+* *POS Handlers:* Create transaction, add-to-cart, remove-from-cart, quantity update, checkout, payment, order submission handlers, and transaction success/failure callbacks.
+* *Validation:* Validate customer info, products, payment amount, order type, payment method, and required fields.
+* *Error Handling:* Handle backend failures, API timeouts, network errors, duplicate submissions, unavailable products, and display user-friendly messages.
+* *Index Integration:* Export POS handlers, import into index, register correctly, ensure module exports and clean application startup.
+* *Validation Messages:* Display field errors, highlight invalid inputs, show checkout messages, clear messages after correction.
+
+
+* **Deliverables:** Input Validation Rules, Error Handling Mechanism, Transaction Prevention, Validation Message Components, POS Handler Integration.
+* **Test Cases:** Validate transaction inputs, display invalid entry errors, prevent incomplete orders, show validation messages, and verify handler imports and execution.
+
+
 
 ### Week 6
-**Day 1 – System Integration Testing and Bug Fixing**
-*   **Sub-Tasks:** Integrate frontend and backend modules, verify product data flow, verify order transaction flow, fix identified bugs.
-*   **Deliverables:** Integrated POS system, product data flow verification, order transaction verification, resolved issues and fixes.
+
+* **Day 1 – System Integration Testing and Bug Fixing**
+* **Tasks:** Integrate frontend and backend, verify inventory synchronization, verify analytics synchronization, fix identified bugs.
+* **Deliverables:** Integrated POS System, Inventory Integration, Analytics Integration, Bug Fixes.
+* **Test Cases:** Complete POS transactions successfully, synchronize inventory after checkout, update analytics reports correctly, and resolve bugs without regression.
+
+
 
 ---
 
-## Testing Strategy
+## Technologies Used
 
-*   **Unit Testing:** Product Listing, Card Components, Search/Filter, Cart, Order Status, Payment Validation.
-*   **Integration Testing:** Product Retrieval/Cart, Order Creation, Payment Processing, Order Monitoring.
-*   **End-to-End Testing:** Complete POS Transaction Flow, Sales Record Generation, Order Status Updates.
+* **Frontend:**
+* React
+* Vite
+* Tailwind CSS
+* Axios
+* React Router
+* Lucide React
+
+
+* **Backend:**
+* Node.js
+* Express.js
+* Supabase
+
+
+* **Database:**
+* PostgreSQL (Supabase)
+
+
+* **Testing:**
+* Vitest
+* React Testing Library
+* Jest DOM
+* MSW (Mock Service Worker)
+
+
 
 ---
 
-## Expected Outcome
-Upon completion, the Sales and POS Management Module will provide a complete sales transaction solution for Aileen and Niculus Bake Shop, enabling efficient product management, cart handling, order processing, payment recording, sales tracking, order monitoring, and sales record generation.
+## Project Modules
+
+* POS Product Listing
+* Cart Management
+* Orders Monitoring
+* Product Management (CRUD)
+* Product & Cart Backend Integration
+* Order Storage
+* Payment Processing
+* Order Status Monitoring
+* POS Handlers & Validation
+* Inventory Integration
+* Analytics Integration
+* System Integration Testing & Bug Fixing

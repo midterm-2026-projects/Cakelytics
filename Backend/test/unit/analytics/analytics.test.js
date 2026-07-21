@@ -17,7 +17,7 @@ const {
 
 const AnalyticsCacheModel = require('../../../src/model/analyticsCache.model.js');
 const OrdersModel = require('../../../src/model/orders.model.js');
-const InventoryLogsModel = require('../../../src/model/inventoryLogs.model.js');
+const { InventoryLogModel: InventoryLogsModel } = require("../../../src/model/inventoryLog.model.js");
 const OrderItemsModel = require('../../../src/model/orderItems.model.js');
 
 
@@ -86,49 +86,6 @@ describe('FourKPI.services', () => {
     // Dapat mabilang na ito nang tama bilang 2
     expect(spyOrders).toHaveBeenCalledTimes(2);
     expect(spyInventoryLogs).toHaveBeenCalledTimes(2);
-  });
-});
-
-
-// ==========================================
-// 3. HEATMAP SERVICE TESTS
-// ==========================================
-describe("Heatmap Service - getOrderVolumeByTimeframe", () => {
-  const selectedWeekStart = "2023-10-16";
-
-  beforeEach(() => vi.clearAllMocks());
-  afterEach(() => vi.restoreAllMocks());
-
-  it("should return heatmap data when model fetch is successful", async () => {
-    // 2023-10-16 is a Monday.
-    // Pinalitan ang 'created_at' ng 'updated_at' dahil ito ang ginagamit ng service.
-    // Tinanggal din ang timezone letter 'Z' para local time ang basahin ng test.
-    const mockOrders = [
-      { updated_at: "2023-10-16T06:00:00" }, // Hour index 0, Day index 0
-      { updated_at: "2023-10-16T08:30:00" }, // Hour index 1, Day index 0
-    ];
-
-    vi.spyOn(OrdersModel, 'getByDateRange').mockResolvedValue(mockOrders);
-
-    const result = await heatmapService.getOrderVolumeByTimeframe(selectedWeekStart);
-
-    expect(OrdersModel.getByDateRange).toHaveBeenCalledTimes(1);
-    // Verifying the matrix correctly mapped the data
-    expect(result[0][0]).toBe(1);
-    expect(result[1][0]).toBe(1);
-    expect(result[0][1]).toBe(0); // Tuesday 6AM should be empty
-  });
-
-  it("should throw an error when model returns no data", async () => {
-    const mockError = new Error("Database error");
-
-    vi.spyOn(OrdersModel, 'getByDateRange').mockRejectedValue(mockError);
-
-    await expect(
-      heatmapService.getOrderVolumeByTimeframe(selectedWeekStart)
-    ).rejects.toThrow("Database error"); // Pinalitan para mag-match sa minock mong error sa itaas
-
-    expect(OrdersModel.getByDateRange).toHaveBeenCalledTimes(1);
   });
 });
 

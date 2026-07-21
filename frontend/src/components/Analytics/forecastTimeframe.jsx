@@ -3,7 +3,7 @@ import { useState } from 'react';
 const RANGES = [
   { key: '7d', label: 'Next 7 Days', days: 7 },
   { key: '30d', label: 'Next 30 Days', days: 30 },
-  { key: '60d', label: 'Next 60 Days', days: 60 }, // Pinalitan mula 90d naging 60d
+  { key: '60d', label: 'Next 60 Days', days: 60 },
 ];
 
 export default function ForecastTimeframe({
@@ -23,6 +23,7 @@ export default function ForecastTimeframe({
         <button
           key={opt.key}
           type="button"
+          data-testid={`forecast-btn-${opt.key}`}
           onClick={() => handleSelect(opt.key)}
           aria-pressed={selected === opt.key}
           className={`px-3 py-1.5 text-[12px] font-bold border-r border-[#e7ded4] last:border-r-0 transition-colors whitespace-nowrap ${

@@ -23,11 +23,7 @@ import Cart from './components/orderingComponents/Cart';
 import OrderCTA from './components/orderingComponents/OrderCTA';
 import CategoryFilters from './components/orderingComponents/CategoryFilters';
 
-import FourKpi from './components/Analytics/fourKPI';
-import PerformanceTimeframe from './components/Analytics/performanceTimeframe';
-import StackedBar from './components/Analytics/stackedBar';
-import OrderVolumeHeatmap from './components/Analytics/heatmap';
-import TopProductsList from './components/Analytics/topProducts';
+import AnalyticsPage from './pages/analyticsPage'
 
 import InventoryPage from './pages/InventoryPage';
 
@@ -110,6 +106,10 @@ export default function App() {
           {/* Kapag nag-trigger yung onLogin, didiretso siya sa /inventory */}
           <Route path="/login" element={<LoginPage onLogin={() => navigate('/inventory')} />} />
 
+          {/* yung all orders tsaka products ito ang sundin niyong final endpoint, palitan niyo na lang yung path na garne kasi sa inventory sya nakaturo <InventoryPage />  */}
+          <Route path="/orders" element={<ProtectedAdminRoute><InventoryPage /></ProtectedAdminRoute>} />
+          <Route path="/products" element={<ProtectedAdminRoute><InventoryPage /></ProtectedAdminRoute>} />
+
           {/* ── ADMIN / POS PAGES (Private - Nakabalot sa ProtectedAdminRoute) ── */}
           <Route path="/pos" element={<ProtectedAdminRoute><POSPage /></ProtectedAdminRoute>} />
           <Route path="/all-orders" element={<ProtectedAdminRoute><AllOrdersPage /></ProtectedAdminRoute>} />
@@ -119,11 +119,25 @@ export default function App() {
           <Route path="/inventory" element={<ProtectedAdminRoute><InventoryPage /></ProtectedAdminRoute>} />
 
           {/* ── ANALYTICS PAGES (Private) ── */}
-          <Route path="/performance-timeframe" element={<ProtectedAdminRoute><PagePreview><PerformanceTimeframe /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/four-kpi" element={<ProtectedAdminRoute><PagePreview><FourKpi /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/stacked-bar" element={<ProtectedAdminRoute><PagePreview><StackedBar /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/heatmap" element={<ProtectedAdminRoute><PagePreview><OrderVolumeHeatmap /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/top-products" element={<ProtectedAdminRoute><PagePreview><TopProductsList /></PagePreview></ProtectedAdminRoute>} />
+          <Route path="/analytics" element={<ProtectedAdminRoute><AnalyticsPage /></ProtectedAdminRoute>} />
+
+                      {/* 404 */}
+            <Route 
+            path="*" 
+            element={
+              <div className="flex flex-col items-center justify-center min-h-screen text-center bg-stone-50">
+                <h1 className="text-4xl font-bold text-red-500 mb-2">404</h1>
+                <h2 className="text-2xl font-semibold text-stone-800 mb-4">Page Not Found</h2>
+                <p className="text-stone-500 mb-6">Sorry, the page you are looking for does not exist.</p>
+                <button 
+                  onClick={() => window.location.href = '/'}
+                  className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-bold"
+                >
+                  Go Back Home
+                </button>
+              </div>
+            } 
+          />
 
 
             <Route 

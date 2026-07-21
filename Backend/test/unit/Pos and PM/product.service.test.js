@@ -46,16 +46,18 @@ describe('ProductService', () => {
 
     const result = await ProductService.createProduct(payload);
 
+    // Actual buildProductPayload uses inclusion, description as fallback,
+    // daily_limit, stock_quantity. No stock_status/description_points.
     expect(ProductModel.create).toHaveBeenCalledWith({
       name: 'Cupcake',
       category: 'Pastry',
-      description: null,
-      description_points: [],
       price: 80,
-      stock_quantity: 0,
-      stock_status: 'Available',
+      inclusion: '',
       image_url: null,
+      daily_limit: 0,
       is_active: true,
+      allow_file_upload: false,
+      stock_quantity: 0,
     });
     expect(result).toEqual({ id: 'p-3' });
   });
@@ -64,19 +66,30 @@ describe('ProductService', () => {
     const payload = {
       name: 'Banana Bread',
       category: 'Bakery',
-      description: 'Sweet and moist',
-      description_points: ['Fresh bananas'],
       price: 120,
       stock_quantity: 10,
-      stock_status: 'Out of Stock',
       image_url: 'https://example.com/banana.jpg',
       is_active: false,
+      allow_file_upload: false,
+      inclusion: 'Sweet and moist',
     };
+
     vi.spyOn(ProductModel, 'create').mockResolvedValue({ data: { id: 'p-4' }, error: null });
 
     const result = await ProductService.createProduct(payload);
 
-    expect(ProductModel.create).toHaveBeenCalledWith(payload);
+    // Actual buildProductPayload uses inclusion field only (no description_points/stock_status)
+    expect(ProductModel.create).toHaveBeenCalledWith({
+      name: 'Banana Bread',
+      category: 'Bakery',
+      price: 120,
+      inclusion: 'Sweet and moist',
+      image_url: 'https://example.com/banana.jpg',
+      daily_limit: 0,
+      is_active: false,
+      allow_file_upload: false,
+      stock_quantity: 10,
+    });
     expect(result).toEqual({ id: 'p-4' });
   });
 
@@ -86,4 +99,29 @@ describe('ProductService', () => {
 
     await expect(ProductService.createProduct({ name: 'Toast', category: 'Pastry', price: 50 })).rejects.toThrow(error);
   });
+
+  it('should update a product', async () => {
+    const body = { name: 'New Name', category: 'Pastry', price: 100, stock_quantity: 5 };
+    vi.spyOn(ProductModel, 'update').mockResolvedValue({ data: { id: 'p-1' }, error: null });
+
+    const result = await ProductService.updateProduct('p-1', body);
+
+    expect(ProductModel.update).toHaveBeenCalledWith('p-1', expect.objectContaining({
+      name: 'New Name',
+      category: 'Pastry',
+      price: 100,
+      stock_quantity: 5,
+    }));
+    expect(result).toEqual({ id: 'p-1' });
+  });
+
+  it('should delete a product', async () => {
+    vi.spyOn(ProductModel, 'delete').mockResolvedValue({ data: { id: 'p-1' }, error: null });
+
+    const result = await ProductService.deleteProduct('p-1');
+
+    expect(ProductModel.delete).toHaveBeenCalledWith('p-1');
+    expect(result).toEqual({ id: 'p-1' });
+  });
 });
+//princes

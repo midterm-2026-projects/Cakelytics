@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const { supabase } = require('../../../src/config/supabase.js');
-const InventoryLogsModel = require('../../../src/model/inventoryLogs.model.js');
+const { InventoryLogModel: InventoryLogsModel } = require("../../../src/model/inventoryLog.model.js");
 
 vi.mock('../../../src/config/supabase.js', () => ({
   supabase: { from: vi.fn() }

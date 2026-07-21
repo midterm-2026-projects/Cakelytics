@@ -1,6 +1,9 @@
-vi.mock('../../../src/config/supabase.js', () => ({
-  supabase: { from: vi.fn() }
-}));
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.mock('../../../src/config/supabase.js', () => {
+  const supabase = { from: vi.fn() };
+  return { supabase, getSupabase: () => supabase };
+});
 
 const { supabase } = require('../../../src/config/supabase.js');
 const OrderItemsModel = require('../../../src/model/orderItems.model.js');
