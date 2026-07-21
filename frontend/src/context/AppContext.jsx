@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 // src/context/AppContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getToken } from '../services/api';
 
 export const formatPHP = (amount) => {
   return new Intl.NumberFormat('en-PH', {
@@ -16,6 +17,17 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_U
 const BASE_URL = `${API_BASE}/inventory`;
 
 const normalizeName = (value = '') => String(value).trim().toLowerCase();
+
+const authFetch = (url, options = {}) => {
+  const token = getToken();
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+};
 
 export function AppProvider({ children }) {
   // ── State ──
@@ -33,11 +45,11 @@ export function AppProvider({ children }) {
   // ── Network Fetch Loaders ──
   const fetchAll = async () => {
     setLoading(true);
-    
+
     // Helper function para hindi mag-fail ang Promise.all kapag may error
     const safeFetch = async (url) => {
       try {
-        const response = await fetch(url);
+        const response = await authFetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
       } catch (err) {
@@ -143,8 +155,6 @@ export function AppProvider({ children }) {
     setLoading(false);
   };
 
-  // Initial fetch
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAll();
@@ -154,10 +164,10 @@ export function AppProvider({ children }) {
 
   // ── Product actions ────
   const addProduct = async () => {};
-  const updateProduct = async (id, data) => { 
-    const res = await fetch(`${BASE_URL}/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  const updateProduct = async (id, data) => {
+    const res = await authFetch(`${BASE_URL}/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update product'); }
-    await fetchAll(); 
+    await fetchAll();
   };
   const deleteProduct = async () => {};
   const uploadProductImage = async () => {};
@@ -169,25 +179,25 @@ export function AppProvider({ children }) {
 
   // ── Ingredient actions ────
   const addIngredient = async (data) => {
-    const res = await fetch(`${BASE_URL}/ingredients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await authFetch(`${BASE_URL}/ingredients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to add ingredient'); }
     await fetchAll();
   };
   const updateIngredient = async (id, data) => {
-    const res = await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await authFetch(`${BASE_URL}/ingredients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update ingredient'); }
     await fetchAll();
   };
   const deleteIngredient = async (id) => {
-    const res = await fetch(`${BASE_URL}/ingredients/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`${BASE_URL}/ingredients/${id}`, { method: 'DELETE' });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete ingredient'); }
     await fetchAll();
   };
   const restockIngredient = async (id, data) => {
-    const res = await fetch(`${BASE_URL}/ingredients/${id}/restock`, { 
-      method: 'PATCH', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(data) 
+    const res = await authFetch(`${BASE_URL}/ingredients/${id}/restock`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to restock ingredient'); }
     await fetchAll();
@@ -195,71 +205,71 @@ export function AppProvider({ children }) {
 
   // ── Material actions ────
   const addMaterial = async (data) => {
-    const res = await fetch(`${BASE_URL}/materials`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await authFetch(`${BASE_URL}/materials`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to add material'); }
     await fetchAll();
   };
   const updateMaterial = async (id, data) => {
-    const res = await fetch(`${BASE_URL}/materials/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await authFetch(`${BASE_URL}/materials/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update material'); }
     await fetchAll();
   };
   const deleteMaterial = async (id) => {
-    const res = await fetch(`${BASE_URL}/materials/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`${BASE_URL}/materials/${id}`, { method: 'DELETE' });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete material'); }
     await fetchAll();
   };
-// Sa AppContext.jsx, sa restockMaterial function
+  // Sa AppContext.jsx, sa restockMaterial function
   const restockMaterial = async (id, data) => {
     console.log("FETCHING URL:", `${BASE_URL}/materials/${id}/restock`);
-    const res = await fetch(`${BASE_URL}/materials/${id}/restock`, { 
-      method: 'PATCH', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(data) 
+    const res = await authFetch(`${BASE_URL}/materials/${id}/restock`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
-  
-  // DAGDAG ITO:
-  const responseData = await res.json().catch(() => ({}));
-  console.log("RESTOCK RESPONSE:", res.ok, responseData);
-  
-  if (!res.ok) { throw new Error(responseData.message || 'Failed to restock'); }
-  await fetchAll();
-};
+
+    // DAGDAG ITO:
+    const responseData = await res.json().catch(() => ({}));
+    console.log("RESTOCK RESPONSE:", res.ok, responseData);
+
+    if (!res.ok) { throw new Error(responseData.message || 'Failed to restock'); }
+    await fetchAll();
+  };
 
   // ── Recipe actions ────
   const addRecipe = async (data) => {
-    const res = await fetch(`${BASE_URL}/recipes`, { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(data) 
+    const res = await authFetch(`${BASE_URL}/recipes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.message || 'Failed to add recipe (Check backend schema)');
     }
-    
+
     await fetchAll();
   };
 
   const updateRecipe = async (id, data) => {
-    const res = await fetch(`${BASE_URL}/recipes/${id}`, { 
-      method: 'PUT', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(data) 
+    const res = await authFetch(`${BASE_URL}/recipes/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to update recipe'); }
     await fetchAll();
   };
   const deleteRecipe = async (id) => {
-    const res = await fetch(`${BASE_URL}/recipes/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`${BASE_URL}/recipes/${id}`, { method: 'DELETE' });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete recipe'); }
     await fetchAll();
   };
 
   // ── Batch production ────
   const confirmBatch = async (payload) => {
-    const res = await fetch(`${BASE_URL}/production`, {
+    const res = await authFetch(`${BASE_URL}/production`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -278,17 +288,17 @@ export function AppProvider({ children }) {
 
   // ── Waste ────
   const logWaste = async (data) => {
-    const res = await fetch(`${BASE_URL}/waste`, { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(data) 
+    const res = await authFetch(`${BASE_URL}/waste`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to log waste'); }
     await fetchAll(); // Refresh data from DB
   };
-  
+
   const deleteWasteLog = async (id) => {
-    const res = await fetch(`${BASE_URL}/waste/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`${BASE_URL}/waste/${id}`, { method: 'DELETE' });
     if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.message || 'Failed to delete waste log'); }
     await fetchAll(); // Refresh data from DB
   };
@@ -299,7 +309,7 @@ export function AppProvider({ children }) {
     fetchAll, fetchOrders,
     addProduct, updateProduct, deleteProduct, uploadProductImage,
     addOrder, addOnlineOrder, updateOrderStatus,
-    addIngredient, updateIngredient, deleteIngredient, restockIngredient, 
+    addIngredient, updateIngredient, deleteIngredient, restockIngredient,
     addMaterial, updateMaterial, deleteMaterial, restockMaterial,
     addRecipe, updateRecipe, deleteRecipe,
     confirmBatch,

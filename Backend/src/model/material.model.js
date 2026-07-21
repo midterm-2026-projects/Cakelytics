@@ -1,4 +1,4 @@
-const { supabase } = require('../../config/supabase.js');
+const { supabase } = require('../config/supabase.js');
 
 const MaterialModel = {
   findAll: () => supabase.from('celebration_materials').select('*').order('name'),

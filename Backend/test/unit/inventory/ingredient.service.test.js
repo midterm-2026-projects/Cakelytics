@@ -1,8 +1,8 @@
 // 👉 FIX: Itinama ang import path para mag-match sa ginagamit ng service
-const { IngredientModel } = require('../../../src/model/inventory/ingredient.model.js');
-const { IngredientService } = require('../../../src/services/inventory/ingredient.service.js');
+const { IngredientModel } = require('../../../src/model/ingredient.model.js');
+const { IngredientService } = require('../../../src/services/inventory.service.js');
 
-const { InventoryLogModel } = require('../../../src/model/inventory/inventoryLog.model.js');
+const { InventoryLogModel } = require('../../../src/model/inventoryLog.model.js');
 
 let dbClient = null;
 try {

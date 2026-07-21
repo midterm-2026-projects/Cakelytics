@@ -2,8 +2,8 @@ require('dotenv').config();
 const request = require('supertest');
 const express = require('express');
 
-const { ProductionService } = require('../../../src/services/inventory/production.service.js');
-const productionRoutes = require('../../../src/routes/inventory/production.routes.js');
+const { ProductionService } = require('../../../src/services/inventory.service.js');
+const productionRoutes = require('../../../src/routes/inventory.routes.js');
 const { errorHandler } = require('../../../src/middleware/errorHandler.js');
 
 // FAKE AUTH
@@ -17,7 +17,7 @@ const fakeAuth = (req, res, next) => {
 
 const app = express();
 app.use(express.json());
-app.use('/api/inventory/production', fakeAuth, productionRoutes);
+app.use('/api/inventory', fakeAuth, productionRoutes);
 app.use(errorHandler);
 
 describe('Production Routes Integration', () => {

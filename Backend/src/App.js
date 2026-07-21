@@ -1,54 +1,52 @@
 const express = require('express');
 const cors = require('cors');
 
-const authRoutes = require('./routes/auth.routes.js');
-const ingredientRoutes = require('./routes/inventory/ingredient.routes.js');
-const materialRoutes = require('./routes/inventory/material.routes.js');
-const productRoutes = require('./routes/inventory/product.routes.js');
-const recipeRoutes = require('./routes/inventory/recipe.routes.js');
-const productionRoutes = require('./routes/inventory/production.routes.js');
-const wasteRoutes = require('./routes/inventory/waste.routes.js');
+const authRoutes = require('./routes/auth.routes.js'); 
 
-const analyticsRoutes = require('./routes/analytics.routes.js');
+const inventoryRoutes = require('./routes/inventory.routes.js'); 
 
-const { errorHandler } = require('./middleware/errorHandler.js');
-const { authMiddlewareJwt } = require('./middleware/auth.middleware.js');
+const analyticsRoutes = require('./routes/analytics.routes.js'); 
 
-const app = express();
+const { errorHandler } = require('./middleware/errorHandler.js'); 
+const { authMiddlewareJwt } = require('./middleware/auth.middleware.js'); 
 
-app.use(cors());
-app.use(express.json());
+const app = express(); 
+
+app.use(cors()); 
+app.use(express.json()); 
 
 // Ilagay ito pagkatapos ng app declaration at BAGO ang mga API routes
-app.use((req, res, next) => {
+app.use((req, res, next) => { 
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} ${req.url}`);
+  console.log(` ${req.method} ${req.url}`); 
   
   // O kung gusto mong makita pati ang body (halimbawa: login credentials)
-  if (req.method === 'POST' || req.method === 'PATCH') {
-    console.log('Body:', JSON.stringify(req.body));
+  if (req.method === 'POST' || req.method === 'PATCH') { 
+    console.log('Body:', JSON.stringify(req.body)); 
   }
   
-  next(); // Importante: Huwag kalimutan ito para magpatuloy ang request
+  next(); // Importante: Huwag kalimutan ito para magpatuloy ang request 
 });
 
-app.get('/', (req, res) => {
-  res.json({ status: 'CakeLytics backend is running' });
+app.get('/', (req, res) => { 
+  res.json({ status: 'CakeLytics backend is running' }); 
 });
 
-app.use('/api', authRoutes);
+app.use('/api', authRoutes); 
 
 
-// ── Protected (JWT required) ───────────────────────
-app.use('/api/inventory/ingredients', ingredientRoutes);
-app.use('/api/inventory/materials', materialRoutes);
-app.use('/api/inventory/products', productRoutes);
-app.use('/api/inventory/recipes', recipeRoutes);
-app.use('/api/inventory/production', productionRoutes);
-app.use('/api/inventory/waste', wasteRoutes);
+// ── Protected (JWT required)
 
-app.use('/api/analytics', analyticsRoutes);
+// example dapat ganito lahat ng endpoints niyo dito
+// app.use('/api/inventory',authMiddlewareJwt, inventoryRoutes); 
+
+
+// Isang tawag na lang ngayon para sa lahat ng endpoints
+
+app.use('/api/inventory',authMiddlewareJwt, inventoryRoutes); 
+
+app.use('/api/analytics',authMiddlewareJwt, analyticsRoutes); 
 
 app.use(errorHandler);
 
-module.exports = app;
+module.exports = app; 

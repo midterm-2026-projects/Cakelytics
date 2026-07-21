@@ -1,4 +1,4 @@
-const { supabase } = require('../../config/supabase.js');
+const { supabase } = require('../config/supabase.js');
 
 const IngredientModel = {
   findAll: () => supabase.from('raw_ingredients').select('*').order('name'),

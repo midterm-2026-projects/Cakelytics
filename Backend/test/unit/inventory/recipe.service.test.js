@@ -1,5 +1,5 @@
-const { RecipeModel } = require('../../../src/model/inventory/recipe.model.js');
-const { RecipeService } = require('../../../src/services/inventory/recipe.service.js');
+const { RecipeModel } = require('../../../src/model/recipe.model.js');
+const { RecipeService } = require('../../../src/services/inventory.service.js');
 
 RecipeModel.findAll           = vi.fn();
 RecipeModel.findById          = vi.fn();
