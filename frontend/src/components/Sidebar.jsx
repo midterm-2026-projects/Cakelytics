@@ -25,7 +25,7 @@ const NAV = [
   },
   {
     section: 'OVERVIEW',
-    items: [{ label: 'Analytics', icon: LineChart, to: '/' }],
+    items: [{ label: 'Analytics', icon: LineChart, to: '/analytics' }],
   }
 ];
 

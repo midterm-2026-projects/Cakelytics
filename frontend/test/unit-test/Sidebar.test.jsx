@@ -29,7 +29,7 @@ describe('Left Sidebar component', () => {
     expect(screen.getByText('All Orders').closest('a')).toHaveAttribute('href', '/orders');
     expect(screen.getByText('Product Management').closest('a')).toHaveAttribute('href', '/products');
     expect(screen.getByText('Inventory').closest('a')).toHaveAttribute('href', '/inventory');
-    expect(screen.getByText('Analytics').closest('a')).toHaveAttribute('href', '/');
+    expect(screen.getByText('Analytics').closest('a')).toHaveAttribute('href', '/analytics');
   });
   
 });

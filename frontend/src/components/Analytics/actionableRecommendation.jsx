@@ -31,7 +31,7 @@ const MOCK_RECOMMENDATIONS = [
 ];
 
 export default function ActionableRecommendation({ recommendations = MOCK_RECOMMENDATIONS }) {
-  if (!recommendations || recommendations.length === 0) return null;
+  const isEmpty = !recommendations || recommendations.length === 0;
 
   return (
     <div className="w-full bg-white border border-brand-200 rounded-2xl shadow-sm flex flex-col overflow-hidden h-full">
@@ -42,8 +42,12 @@ export default function ActionableRecommendation({ recommendations = MOCK_RECOMM
           Actionable Recommendations
         </h3>
       </div>
-      
-      {/* Recommendations List */}
+
+      {isEmpty ? (
+        <div role="status" className="flex items-center justify-center flex-1 min-h-[160px] m-4 sm:m-5 text-sm text-brand-400 border border-dashed border-brand-200 rounded-lg text-center px-6">
+          No recommendations available yet. 
+        </div>
+      ) : (
       <div className="p-4 sm:p-5 flex flex-col gap-3 sm:gap-4 flex-1">
         {recommendations.map((ins, i) => {
           const theme = AI_COLORS[ins.type] || AI_COLORS.neutral;
@@ -72,6 +76,7 @@ export default function ActionableRecommendation({ recommendations = MOCK_RECOMM
           );
         })}
       </div>
+      )}
     </div>
   );
 }

@@ -22,11 +22,7 @@ import Cart from './components/orderingComponents/Cart';
 import OrderCTA from './components/orderingComponents/OrderCTA';
 import CategoryFilters from './components/orderingComponents/CategoryFilters';
 
-import FourKpi from './components/Analytics/fourKPI';
-import PerformanceTimeframe from './components/Analytics/performanceTimeframe';
-import StackedBar from './components/Analytics/stackedBar';
-import OrderVolumeHeatmap from './components/Analytics/heatmap';
-import TopProductsList from './components/Analytics/topProducts';
+import AnalyticsPage from './pages/analyticsPage'
 
 import InventoryPage from './pages/InventoryPage';
 
@@ -117,11 +113,8 @@ export default function App() {
           <Route path="/inventory" element={<ProtectedAdminRoute><InventoryPage /></ProtectedAdminRoute>} />
 
           {/* ── ANALYTICS PAGES (Private) ── */}
-          <Route path="/performance-timeframe" element={<ProtectedAdminRoute><PagePreview><PerformanceTimeframe /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/four-kpi" element={<ProtectedAdminRoute><PagePreview><FourKpi /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/stacked-bar" element={<ProtectedAdminRoute><PagePreview><StackedBar /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/heatmap" element={<ProtectedAdminRoute><PagePreview><OrderVolumeHeatmap /></PagePreview></ProtectedAdminRoute>} />
-          <Route path="/top-products" element={<ProtectedAdminRoute><PagePreview><TopProductsList /></PagePreview></ProtectedAdminRoute>} />
+          <Route path="/analytics" element={<ProtectedAdminRoute><AnalyticsPage /></ProtectedAdminRoute>} />
+
 
         </Routes>
       </ToastProvider>

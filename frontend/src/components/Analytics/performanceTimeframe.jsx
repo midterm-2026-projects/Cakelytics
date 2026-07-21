@@ -5,7 +5,7 @@ const VIEWS = [
   'Today',
   'Yesterday',
   'Last 7 Days',
-  'Last 30 Days',
+  'Last Month',
   'This Month',
   'This Year',
   'Custom Range...',
@@ -52,7 +52,11 @@ export default function PerformanceTimeframe({ value, onChange, options = VIEWS 
   return (
     <div className="flex items-center gap-4">
       <div className="relative" ref={containerRef}>
+        {/* Trigger Button */}
         <button
+          data-testid="performance-dropdown-trigger"
+          aria-haspopup="menu"
+          aria-expanded={open}
           onClick={() => {
             setOpen((o) => !o);
             setShowCustom(false);
@@ -69,10 +73,12 @@ export default function PerformanceTimeframe({ value, onChange, options = VIEWS 
         {open && (
           <div className="absolute z-10 top-full right-0 mt-2 w-full min-w-[200px] bg-white border border-brand-300 rounded-lg shadow-sm overflow-hidden">
             {!showCustom ? (
-              <ul className="py-1">
+              <ul role="menu" className="py-1">
                 {options.map((v) => (
-                  <li key={v}>
+                  <li key={v} role="presentation">
                     <button
+                      role="menuitem"
+                      data-testid={`option-${v.replace(/\s+/g, '-').toLowerCase()}`}
                       onClick={() => handleSelect(v)}
                       className={`w-full text-left px-4 py-2 text-[13px] font-bold transition-colors whitespace-nowrap ${
                         value === v
@@ -96,6 +102,7 @@ export default function PerformanceTimeframe({ value, onChange, options = VIEWS 
                   <span className="text-[11px] font-bold text-brand-600">Start date</span>
                   <input
                     type="date"
+                    data-testid="custom-start-date"
                     value={customStart}
                     onChange={(e) => setCustomStart(e.target.value)}
                     className="px-3 py-2 text-[13px] border border-brand-300 rounded-md text-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700"
@@ -106,6 +113,7 @@ export default function PerformanceTimeframe({ value, onChange, options = VIEWS 
                   <span className="text-[11px] font-bold text-brand-600">End date</span>
                   <input
                     type="date"
+                    data-testid="custom-end-date"
                     value={customEnd}
                     onChange={(e) => setCustomEnd(e.target.value)}
                     className="px-3 py-2 text-[13px] border border-brand-300 rounded-md text-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700"
@@ -114,12 +122,14 @@ export default function PerformanceTimeframe({ value, onChange, options = VIEWS 
 
                 <div className="flex items-center justify-end gap-2 pt-1">
                   <button
+                    data-testid="back-custom-range"
                     onClick={() => setShowCustom(false)}
                     className="px-3 py-1.5 text-[13px] font-bold text-brand-600 hover:text-brand-800 transition-colors"
                   >
                     Back
                   </button>
                   <button
+                    data-testid="apply-custom-range"
                     onClick={applyCustomRange}
                     disabled={!customStart || !customEnd}
                     className="px-3 py-1.5 text-[13px] font-bold rounded-md bg-brand-700 text-white hover:bg-brand-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
