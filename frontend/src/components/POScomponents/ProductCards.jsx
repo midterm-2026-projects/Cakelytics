@@ -1,36 +1,106 @@
-// src/components/ProductCard.jsx
-export default function ProductCard({ product, onAddToCart }) {
-  const stockStatus = product.stock || "Available";
+// =============================================================================
+// Week 6 — Day 1: System Integration Testing and Bug Fixing
+// Feature: Integrated POS System (Product Cards Display)
+// -----------------------------------------------------------------------------
+// Renders products grouped by category in a responsive grid layout.
+// Each card displays product image, name, stock level, and price with
+// an "ADD" button to include items in the cart for checkout.
+// =============================================================================
+
+import { Plus } from "lucide-react";
+
+export default function ProductCards({ products, onAddToCart }) {
+  const groups = [];
+  const map = new Map();
+
+  for (const product of products) {
+    const category = product.category || "Uncategorized";
+
+    if (!map.has(category)) {
+      map.set(category, groups.length);
+      groups.push({
+        category,
+        items: [],
+      });
+    }
+
+    groups[map.get(category)].items.push(product);
+  }
 
   return (
-    <div className="bg-white border border-[#ead2cc] rounded-[12px] overflow-hidden shadow-sm">
-      <div className="h-[150px] bg-cover bg-center" style={{ backgroundImage: `url("${product.image}")` }}>
-        {/* Stock Badge */}
-        <span className="bg-black text-white text-xs px-2 py-1 m-2 inline-block rounded">
-          Stock: {stockStatus}
-        </span>
-      </div>
+    <div className="mt-5 space-y-8">
+      {groups.map((group) => (
+        <section key={group.category}>
+          {/* Category */}
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xs font-bold tracking-wider uppercase">
+              {group.category}
+            </h2>
 
-      <div className="p-4">
-        <h3 className="text-[18px] font-black text-[#29130e]">{product.name}</h3>
-        
-        {/* I-map ang details/inclusions */}
-        <ul className="text-sm text-gray-600 my-2 list-disc pl-4">
-          {product.details && product.details.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
+            <div className="flex-1 border-b border-[#ead2cc]" />
 
-        <div className="flex justify-between items-center mt-4">
-          <strong className="text-[#684238]">₱{product.price.toLocaleString()}.00</strong>
-          <button 
-            onClick={() => onAddToCart(product)}
-            className="bg-[#684238] text-white px-4 py-2 rounded-lg"
-          >
-            + ADD
-          </button>
-        </div>
-      </div>
+            <span className="text-xs text-[#c08d75]">
+              {group.items.length} items
+            </span>
+          </div>
+
+          {/* Products */}
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            {group.items.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white border border-[#EFD9D2] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
+              >
+                {/* Image */}
+                <div className="relative h-[145px] overflow-hidden bg-[#fafafa]">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = "/products/default.png";
+                    }}
+                  />
+
+                  <span className="absolute top-2 right-2 bg-[#4E4039]/90 text-white text-[11px] font-semibold rounded-full px-2 py-1">
+                    Stock: {product.stock ?? 10}
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div className="px-3 py-3">
+                  <h3 className="font-semibold text-[17px] truncate text-[#2B1C16]">
+                    {product.name}
+                  </h3>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="font-bold text-[#3D2A22] text-lg">
+                      ₱{Number(product.price).toFixed(2)}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        onAddToCart({
+                          id: product.id,
+                          name: product.name,
+                          category: product.category,
+                          price: product.price,
+                          image: product.image,
+                          details: product.details,
+                        })
+                      }
+                      className="flex items-center gap-1 bg-[#6B4638] hover:bg-[#5a392d] text-white rounded-lg px-3 py-1.5 text-xs font-bold transition"
+                    >
+                      <Plus size={13} />
+                      ADD
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

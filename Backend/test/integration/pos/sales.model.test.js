@@ -1,5 +1,9 @@
 const supabaseModule = require('../../../src/config/supabase');
 const getSupabase = vi.fn();
+
+// “Integration” here validates that SalesModel/OrderTransactionModel
+// compose Supabase query builder calls correctly end-to-end,
+// without hitting a real database.
 supabaseModule.getSupabase = getSupabase;
 
 const { SalesModel, OrderTransactionModel } = require('../../../src/model/sales.model');
@@ -10,17 +14,17 @@ function buildQueryChain() {
     order: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+    limit: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data: { id: 'mock-id' }, error: null }),
   };
 }
 
-describe('SalesModel', () => {
+describe('SalesModel (integration)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should list sales with a limit', async () => {
+  it('findAll lists sales with limit + sold_at order', async () => {
     const query = buildQueryChain();
     const client = { from: vi.fn().mockReturnValue(query) };
     getSupabase.mockReturnValue(client);
@@ -33,7 +37,7 @@ describe('SalesModel', () => {
     expect(query.limit).toHaveBeenCalledWith(20);
   });
 
-  it('should create a sale through the model', async () => {
+  it('create inserts payload and returns single row', async () => {
     const query = buildQueryChain();
     const client = { from: vi.fn().mockReturnValue(query) };
     getSupabase.mockReturnValue(client);
@@ -47,12 +51,12 @@ describe('SalesModel', () => {
   });
 });
 
-describe('OrderTransactionModel', () => {
+describe('OrderTransactionModel (integration)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should fetch transaction rows for an order', async () => {
+  it('findByOrderId loads transaction rows for an order', async () => {
     const query = buildQueryChain();
     const client = { from: vi.fn().mockReturnValue(query) };
     getSupabase.mockReturnValue(client);
@@ -65,7 +69,7 @@ describe('OrderTransactionModel', () => {
     expect(query.order).toHaveBeenCalledWith('created_at', { ascending: true });
   });
 
-  it('should create many order transactions', async () => {
+  it('createMany inserts many order transaction items', async () => {
     const query = buildQueryChain();
     const client = { from: vi.fn().mockReturnValue(query) };
     getSupabase.mockReturnValue(client);
@@ -77,4 +81,4 @@ describe('OrderTransactionModel', () => {
     expect(query.select).toHaveBeenCalled();
   });
 });
-// princes
+
