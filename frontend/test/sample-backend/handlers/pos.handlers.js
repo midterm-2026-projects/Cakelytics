@@ -178,6 +178,9 @@ export function resetMockPOSData() {
   mockOrderItems = structuredClone(SEED.orderItems);
 }
 
+// Added alias for backward compatibility with tests
+export const resetMockData = resetMockPOSData;
+
 // ─── HELPERS ───
 function generateId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -192,7 +195,7 @@ export const posHandlers = [
   // ═══════════════════════════════════════════════════════════
   // 1. PRODUCTS — Shared by POS Page & Product Management Page
   // ═══════════════════════════════════════════════════════════
-  http.get('/api/products', ({ request }) => {
+  http.get('*/api/products', ({ request }) => {
     const url = new URL(request.url);
     const category = url.searchParams.get('category') || '';
     const search = url.searchParams.get('search') || '';
@@ -215,7 +218,7 @@ export const posHandlers = [
     return HttpResponse.json({ success: true, data: filtered });
   }),
 
-  http.post('/api/products', async ({ request }) => {
+  http.post('*/api/products', async ({ request }) => {
     const body = await request.json();
     const newProduct = {
       id: generateId('p'),
@@ -233,7 +236,7 @@ export const posHandlers = [
     return HttpResponse.json({ success: true, data: newProduct }, { status: 201 });
   }),
 
-  http.put('/api/products/:id', async ({ request, params }) => {
+  http.put('*/api/products/:id', async ({ request, params }) => {
     const { id } = params;
     const index = mockProducts.findIndex((p) => p.id === id);
     if (index === -1) {
@@ -260,7 +263,7 @@ export const posHandlers = [
     return HttpResponse.json({ success: true, data: mockProducts[index] });
   }),
 
-  http.delete('/api/products/:id', ({ params }) => {
+  http.delete('*/api/products/:id', ({ params }) => {
     const { id } = params;
     const index = mockProducts.findIndex((p) => p.id === id);
     if (index === -1) {
@@ -276,7 +279,7 @@ export const posHandlers = [
   // ═══════════════════════════════════════════════════════════
   // 2. ORDERS — Used by All Orders Page
   // ═══════════════════════════════════════════════════════════
-  http.get('/api/orders', ({ request }) => {
+  http.get('*/api/orders', ({ request }) => {
     const url = new URL(request.url);
     const status = url.searchParams.get('status') || '';
 
@@ -299,9 +302,52 @@ export const posHandlers = [
   }),
 
   // ═══════════════════════════════════════════════════════════
+  // 2b. GET /api/orders/:id — Single order with items
+  // ═══════════════════════════════════════════════════════════
+  http.get('*/api/orders/:id', ({ params }) => {
+    const { id } = params;
+    const order = mockOrders.find((o) => o.id === id);
+    if (!order) {
+      return HttpResponse.json(
+        { success: false, message: 'Order not found' },
+        { status: 404 }
+      );
+    }
+    return HttpResponse.json({
+      success: true,
+      data: { ...order, items: findOrderItems(order.id) },
+    });
+  }),
+
+  // ═══════════════════════════════════════════════════════════
+  // 2c. PATCH /api/orders/:id/status — Update order status
+  // ═══════════════════════════════════════════════════════════
+  http.patch('*/api/orders/:id/status', async ({ params, request }) => {
+    const { id } = params;
+    const body = await request.json();
+    const index = mockOrders.findIndex((o) => o.id === id);
+    if (index === -1) {
+      return HttpResponse.json(
+        { success: false, message: 'Order not found' },
+        { status: 404 }
+      );
+    }
+    mockOrders[index] = {
+      ...mockOrders[index],
+      status: body.status || mockOrders[index].status,
+      updated_at: new Date().toISOString(),
+    };
+    return HttpResponse.json({
+      success: true,
+      message: 'Order status updated successfully',
+      data: { ...mockOrders[index], items: findOrderItems(mockOrders[index].id) },
+    });
+  }),
+
+  // ═══════════════════════════════════════════════════════════
   // 3. CHECKOUT — Used by POS Page when completing an order
   // ═══════════════════════════════════════════════════════════
-  http.post('/api/orders/checkout', async ({ request }) => {
+  http.post('*/api/orders/checkout', async ({ request }) => {
     const body = await request.json();
 
     // Validate that items exist
@@ -363,3 +409,4 @@ export const posHandlers = [
     );
   }),
 ];
+
