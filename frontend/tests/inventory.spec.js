@@ -15,6 +15,7 @@ test('it should pass the E2E Inventory Flow', async ({ page }) => {
   await page.getByRole('textbox', { name: '••••••••' }).click();
   await page.getByRole('textbox', { name: '••••••••' }).fill('Araymo.123');
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.waitForURL(/.*inventory/, { timeout: 30000 });
 
   const addBtn = page.getByRole('button', { name: 'Add New Ingredient' });
   await addBtn.waitFor({ state: 'visible', timeout: 60000 });

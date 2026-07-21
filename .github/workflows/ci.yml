@@ -57,7 +57,7 @@ jobs:
               runs-on: ubuntu-latest
               needs: backend-tests
               env:
-                BACKEND_PORT: 4000
+                BACKEND_PORT: 3000
               steps:
                 - name: Checkout code
                   uses: actions/checkout@v4
@@ -108,6 +108,7 @@ jobs:
                   run: |
                     npm run dev &
                     npx wait-on http-get://localhost:5173
+                    npx wait-on http://localhost:${{ env.BACKEND_PORT }}/api/health --timeout 30000
                     npx playwright test --project=chromium
                   env:
                     APP_URL: "http://localhost:5173"
