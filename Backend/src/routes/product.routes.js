@@ -1,42 +1,14 @@
-const { getSupabase } = require('../config/supabase');
 
-const ProductModel = {
-  async findAll(filters = {}) {
-    let query = getSupabase()
-      .from('products')
-      .select('*')
-      .order('name', { ascending: true });
+const express = require('express');
+const router = express.Router();
 
-    if (filters.category && filters.category !== 'All') {
-      query = query.eq('category', filters.category);
-    }
+const { ProductController } = require('../controller/product.controller');
 
-    if (filters.search) {
-      query = query.ilike('name', `%${filters.search}%`);
-    }
+router.get('/', ProductController.getProducts);
+router.get('/:id', ProductController.getProductById);
+router.post('/', ProductController.createProduct);
+router.put('/:id', ProductController.updateProduct);
+router.patch('/:id', ProductController.updateProduct);
+router.delete('/:id', ProductController.deleteProduct);
 
-    if (filters.activeOnly !== false) {
-      query = query.eq('is_active', true);
-    }
-
-    return await query;
-  },
-
-  async findById(id) {
-    return await getSupabase()
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single();
-  },
-
-  async create(payload) {
-    return await getSupabase()
-      .from('products')
-      .insert(payload)
-      .select()
-      .single();
-  },
-};
-
-module.exports = { ProductModel };
+module.exports = router;

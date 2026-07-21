@@ -37,6 +37,29 @@ const ProductModel = {
       .select()
       .single();
   },
+  
+  async update(id, payload) {
+    const { data, error } = await getSupabase()
+      .from('products')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error };
+  },
+    async delete(id) {
+    const { data, error } = await getSupabase()
+      .from('products')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error };
+  },
 };
 
 module.exports = { ProductModel };

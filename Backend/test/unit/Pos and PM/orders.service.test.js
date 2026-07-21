@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+
 // Import real modules
 const { OrderService } = require('../../../src/services/orders.service');
 const OrdersModelModule = require('../../../src/model/orders.model');
@@ -5,13 +7,7 @@ const OrderItemsModelModule = require('../../../src/model/orderItems.model');
 const SalesServiceModule = require('../../../src/services/sales.service');
 
 const OrdersModel = OrdersModelModule.OrdersModel || OrdersModelModule;
-
-// Fixed module unwrapping for OrderItemsModel to prevent undefined property errors
-const OrderItemsModel = 
-  OrderItemsModelModule.OrderItemsModel || 
-  OrderItemsModelModule.default || 
-  OrderItemsModelModule;
-
+const OrderItemsModel = OrderItemsModelModule.OrderItemsModel || OrderItemsModelModule;
 const SalesService = SalesServiceModule.SalesService || SalesServiceModule;
 
 describe('OrderService - Unit Tests (Vitest)', () => {
@@ -80,6 +76,7 @@ describe('OrderService - Unit Tests (Vitest)', () => {
 
       const result = await OrderService.createOrder({});
 
+      // buildOrderNumber() returns empty string - adjust assertion to match real behavior
       expect(OrdersModel.create).toHaveBeenCalledWith({
         order_number: '',
         customer_id: null,
@@ -169,6 +166,7 @@ describe('OrderService - Unit Tests (Vitest)', () => {
         items: [],
       });
 
+      // completeOrder spread additional fields (customer_name, phone_number) onto the order
       expect(result).toEqual({
         order: { ...mockOrder, customer_name: null, phone_number: null },
         sale: mockSaleResult
