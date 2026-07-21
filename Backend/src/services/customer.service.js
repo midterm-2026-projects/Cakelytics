@@ -1,4 +1,4 @@
-const { CustomerModel } = require('../../model/orderingModels/customer.model');
+const { CustomerModel } = require('../model/customer.model');
 
 function buildCustomerPayload(body) {
   return {
@@ -15,6 +15,11 @@ const CustomerService = {
     const { data, error } = await CustomerModel.findAll(filters);
     if (error) throw error;
     return data;
+  },
+
+  // ADDED: alias so it matches what customer.controller.js actually calls
+  async getAllCustomers(filters = {}) {
+    return this.getCustomers(filters);
   },
 
   async getCustomerById(id) {
@@ -47,6 +52,11 @@ const CustomerService = {
     const { error } = await CustomerModel.remove(id);
     if (error) throw error;
     return { id };
+  },
+
+  // ADDED: was missing entirely — controller was calling a nonexistent method
+  async verifyOrderAndCustomer(orderRef, phone) {
+    return CustomerModel.verifyOrderAndCustomer(orderRef, phone);
   },
 };
 

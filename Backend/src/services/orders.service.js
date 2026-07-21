@@ -1,11 +1,13 @@
+const { randomUUID } = require('crypto');
 
 const OrdersModelModule = require('../model/orders.model');
 const OrdersModel = OrdersModelModule.OrdersModel || OrdersModelModule;
+
 const OrderItemsModelModule = require('../model/orderItems.model');
 const OrderItemsModel = OrderItemsModelModule.OrderItemsModel || OrderItemsModelModule;
+
 const { SalesService } = require('../services/sales.service');
-
-
+const { CustomerModel } = require('../model/customer.model');
 
 function buildOrderNumber() {
   return '';
@@ -32,28 +34,24 @@ function normalizeStatus(status) {
 function isMissingOptionalTable(error) {
   const message = String(error?.message || '').toLowerCase();
   return (
-    message.includes('relation') && message.includes('does not exist')
-  ) || message.includes('could not find the table') || message.includes('schema cache');
+    (message.includes('relation') && message.includes('does not exist')) ||
+    message.includes('could not find the table') ||
+    message.includes('schema cache')
+  );
 }
 
 const OrderService = {
-  // Pinag-isang listing method na may backward-compatible alias
   async getAllOrders(filters = {}) {
-    // OrdersModel.findAll() already returns data array.
-    // Keep backward compatibility with older model implementations.
     const result = await OrdersModel.findAll(filters);
 
     if (Array.isArray(result)) return result;
 
-    // If model returns { data, error }
     const maybeData = result?.data;
     const maybeError = result?.error;
     if (maybeError) throw maybeError;
     return maybeData || [];
   },
 
-  // Backward-compatible alias (no Supabase usage here)
-  // Some tests/older code may call getOrders instead of getAllOrders.
   getOrders: async (query = {}) => OrderService.getAllOrders(query),
 
   async getOrderById(id) {
@@ -105,15 +103,6 @@ const OrderService = {
       items,
       payment_type,
       amount_paid,
-
-      // NOTE: `change_due` is intentionally NOT handled for orders because the
-      // `orders` table schema (schema_para_sa_SPBS.sql) does not contain a
-      // `change_due` column.
-      //
-      // If you later add a migration for `orders.change_due`, we can safely
-      // re-enable passing it.
-
-      // Optional fields
       status,
       customer_name,
       phone_number,
@@ -122,7 +111,6 @@ const OrderService = {
       order_type,
       subtotal,
       additional_charge,
-      // Legacy key support
       additional_fee,
       discount,
       grand_total,
@@ -141,7 +129,9 @@ const OrderService = {
         return sum + Number(item.quantity || 0) * price;
       }, 0)
     );
-    const grandTotalValue = Number(grand_total ?? subtotalValue + Number(mappedAdditional || 0) - Number(discount || 0));
+    const grandTotalValue = Number(
+      grand_total ?? subtotalValue + Number(mappedAdditional || 0) - Number(discount || 0)
+    );
     const amountPaidValue = Number(amount_paid ?? grandTotalValue);
 
     let customerId = body.customer_id || null;
@@ -199,7 +189,6 @@ const OrderService = {
         discount,
         grand_total: grandTotalValue,
         amount_paid: amountPaidValue,
-        // change_due: change_due ?? Math.max(0, amountPaidValue - grandTotalValue),
         sale_number,
         items: [],
       });
@@ -220,6 +209,117 @@ const OrderService = {
     if (error) throw error;
     return data;
   },
+};
+
+OrderService.getCustomerOrders = async (customerId) => {
+  const { data, error } = await OrdersModel.findByCustomer(customerId);
+  if (error) throw error;
+  return data;
+};
+
+OrderService.createOrderWithItems = async (body) => {
+  let customerId = body.customer_id || null;
+
+  if (!customerId && body.customer_name && body.customer_phone) {
+    try {
+      let existingCustomer = null;
+
+      if (typeof CustomerModel.findByPhone === 'function') {
+        const { data } = await CustomerModel.findByPhone(body.customer_phone);
+        existingCustomer = data;
+      } else if (typeof CustomerModel.findAll === 'function') {
+        const { data } = await CustomerModel.findAll({
+          phone: body.customer_phone,
+        });
+
+        if (data && data.length > 0) {
+          existingCustomer = data[0];
+        }
+      }
+
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+      } else {
+        const newCustomerPayload = {
+          name: body.customer_name,
+          phone: body.customer_phone,
+          alt_phone: body.customer_alt_phone || null,
+          facebook: body.customer_facebook || null,
+          email: body.customer_email || null,
+        };
+
+        const { data: createdCustomer, error: customerError } =
+          await CustomerModel.create(newCustomerPayload);
+
+        if (customerError) throw customerError;
+
+        customerId = createdCustomer.id;
+      }
+    } catch (err) {
+      console.error(
+        'Failed to process customer registration during checkout:',
+        err
+      );
+    }
+  }
+
+  const subtotal =
+    body.items?.reduce(
+      (sum, item) => sum + item.quantity * item.unit_price,
+      0
+    ) || 0;
+
+  const grand_total =
+    subtotal + (body.additional_charge || 0) - (body.discount || 0);
+
+  const balance = grand_total - (body.amount_paid || 0);
+
+  const orderPayload = {
+    id: randomUUID(),
+    order_number: body.order_number || `ORD-${Date.now().toString().slice(-6)}`,
+    customer_id: customerId,
+    placed_by_admin: body.placed_by_admin || null,
+    order_type: body.order_type || 'Pre-Order',
+    source: body.source || 'online',
+    status: body.status || 'Confirmed',
+    subtotal,
+    additional_charge: body.additional_charge || 0,
+    discount: body.discount || 0,
+    grand_total,
+    payment_type: body.payment_type || 'deposit',
+    amount_paid: body.amount_paid || 0,
+    balance,
+    pickup_date: body.pickup_date || null,
+    pickup_time: body.pickup_time || null,
+    special_instructions: body.special_instructions || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  const itemsPayload = (body.items || []).map((item) => ({
+    id: randomUUID(),
+    product_id: item.product_id,
+    product_name: item.product_name,
+    variant_label: item.variant_label || null,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    total_price: item.quantity * item.unit_price,
+  }));
+
+  const { data, error } = await OrdersModel.createWithItems(
+    orderPayload,
+    itemsPayload
+  );
+
+  if (error) throw error;
+
+  return data;
+};
+
+OrderService.updateOrderStatus = async (id, status) => {
+  const { data, error } = await OrdersModel.updateStatus(id, status);
+  if (error) throw error;
+  return data;
 };
 
 module.exports = { OrderService };
