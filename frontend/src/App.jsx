@@ -121,7 +121,7 @@ export default function App() {
           {/* ── ANALYTICS PAGES (Private) ── */}
           <Route path="/analytics" element={<ProtectedAdminRoute><AnalyticsPage /></ProtectedAdminRoute>} />
 
-                      {/* 404 */}
+          {/* 404 */}
             <Route 
             path="*" 
             element={
