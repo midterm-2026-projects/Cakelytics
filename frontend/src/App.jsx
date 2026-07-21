@@ -107,8 +107,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage onLogin={() => navigate('/inventory')} />} />
 
           {/* yung all orders tsaka products ito ang sundin niyong final endpoint, palitan niyo na lang yung path na garne kasi sa inventory sya nakaturo <InventoryPage />  */}
-          <Route path="/orders" element={<ProtectedAdminRoute><InventoryPage /></ProtectedAdminRoute>} />
-          <Route path="/products" element={<ProtectedAdminRoute><InventoryPage /></ProtectedAdminRoute>} />
+          <Route path="/orders" element={<ProtectedAdminRoute><AllOrdersPage/></ProtectedAdminRoute>} />
+          <Route path="/products" element={<ProtectedAdminRoute><ProductManagementPage /></ProtectedAdminRoute>} />
 
           {/* ── ADMIN / POS PAGES (Private - Nakabalot sa ProtectedAdminRoute) ── */}
           <Route path="/pos" element={<ProtectedAdminRoute><POSPage /></ProtectedAdminRoute>} />
