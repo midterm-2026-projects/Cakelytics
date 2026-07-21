@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { AppProvider } from '../../src/context/AppContext';
 import { ToastProvider } from '../../src/components/ui/index';
-import AnalyticsPage from '../../src/pages/AnalyticsPage'; 
+import AnalyticsPage from '../../src/pages/analyticsPage.jsx'; 
 
 const AllTheProviders = ({ children }) => (
   <MemoryRouter>
