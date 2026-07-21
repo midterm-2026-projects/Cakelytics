@@ -7,6 +7,17 @@ const { ProductionModel } = require('../model/production.model.js');
 const { RecipeModel } = require('../model/recipe.model.js');
 const { WasteModel } = require('../model/waste.model.js');
 
+
+const { ProductModel } = require('../model/product.model.js');
+
+const ProductService = {
+  getProducts: async (filters) => {
+    const { data, error } = await ProductModel.findAll(filters);
+    if (error) throw error;
+    return data;
+  },
+};
+
 // RAW INGREDIENTS
 const IngredientService = {
   getAll: async () => {
@@ -329,4 +340,4 @@ const WasteService = {
   },
 };
 
-module.exports = { WasteService, RecipeService, ProductionService, MaterialService, IngredientService };
+module.exports = { ProductService, WasteService, RecipeService, ProductionService, MaterialService, IngredientService };
