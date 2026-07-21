@@ -119,8 +119,6 @@ export default function App() {
           {/* ── ANALYTICS PAGES (Private) ── */}
           <Route path="/analytics" element={<ProtectedAdminRoute><AnalyticsPage /></ProtectedAdminRoute>} />
 
-<<<<<<< HEAD
-=======
                       {/* 404 */}
             <Route 
             path="*" 
@@ -138,7 +136,6 @@ export default function App() {
               </div>
             } 
           />
->>>>>>> main
 
         </Routes>
       </ToastProvider>
