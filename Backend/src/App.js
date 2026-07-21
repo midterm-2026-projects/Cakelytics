@@ -18,7 +18,7 @@ app.use(express.json());
 // Ilagay ito pagkatapos ng app declaration at BAGO ang mga API routes
 app.use((req, res, next) => { 
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} ${req.url}`); 
+  console.log(` ${req.method} ${req.url}`); 
   
   // O kung gusto mong makita pati ang body (halimbawa: login credentials)
   if (req.method === 'POST' || req.method === 'PATCH') { 
@@ -26,6 +26,10 @@ app.use((req, res, next) => {
   }
   
   next(); // Importante: Huwag kalimutan ito para magpatuloy ang request 
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
 app.get('/', (req, res) => { 
@@ -37,10 +41,16 @@ app.use('/api', authRoutes);
 
 // ── Protected (JWT required)
 
-// Isang tawag na lang ngayon para sa lahat ng inventory endpoints
-app.use('/api/inventory', inventoryRoutes); 
+// example dapat ganito lahat ng endpoints niyo dito depende kung alin ang dapat protected at alin ang public.
 
-app.use('/api/analytics', analyticsRoutes); 
+// app.use('/api/inventory',authMiddlewareJwt, inventoryRoutes); 
+
+
+// Isang tawag na lang ngayon para sa lahat ng endpoints
+
+app.use('/api/inventory',authMiddlewareJwt, inventoryRoutes); 
+
+app.use('/api/analytics',authMiddlewareJwt, analyticsRoutes); 
 
 app.use(errorHandler);
 
