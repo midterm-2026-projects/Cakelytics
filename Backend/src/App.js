@@ -10,6 +10,9 @@ const analyticsRoutes = require('./routes/analytics.routes.js');
 const { errorHandler } = require('./middleware/errorHandler.js'); 
 const { authMiddlewareJwt } = require('./middleware/auth.middleware.js'); 
 
+const customerRoutes = require('../src/routes/customer.routes.js');
+const orderRoutes = require('../src/routes/orders.routes.js'); 
+
 const app = express(); 
 
 app.use(cors()); 
@@ -37,7 +40,9 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', authRoutes); 
-
+app.use('/api/customers', customerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/orders/checkout', orderRoutes);
 
 // ── Protected (JWT required)
 
