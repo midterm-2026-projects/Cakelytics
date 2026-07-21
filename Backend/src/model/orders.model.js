@@ -1,4 +1,4 @@
-const { supabase } = require('../config/supabase.js');
+const { getSupabase } = require('../config/supabase.js');
 
 const TABLE = 'orders';
 
@@ -16,7 +16,7 @@ const OrdersModel = {
     endDate,
     { columns = '*', excludeCancelled = false } = {}
   ) => {
-    let query = supabase
+    let query = getSupabase()
       .from(TABLE)
       .select(columns)
       // PINALITAN: Mula 'created_at' naging 'updated_at' na
@@ -30,6 +30,36 @@ const OrdersModel = {
     const { data, error } = await query;
     if (error) throw error;
     return data;
+  },
+    async findAll() {
+    // Keep consistent return shape with getAllOrders expectations.
+    // Also avoid returning the raw { data, error } object.
+    const { data, error } = await getSupabase()
+      .from('orders')
+      .select('*')
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async findById(id) {
+    const { data, error } = await getSupabase()
+      .from('orders')
+      .select('*, customers(name, phone), order_items(*)')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async create(payload) {
+    return getSupabase()
+      .from('orders')
+      .insert(payload)
+      .select()
+      .single();
   },
 };
 
