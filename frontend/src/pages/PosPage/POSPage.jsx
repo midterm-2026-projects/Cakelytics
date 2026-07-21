@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Clock, Calendar, User } from "lucide-react";
 import SearchBar from "../../components/POScomponents/SearchBar";
@@ -145,14 +146,27 @@ export default function POSPage() {
     setCart((currentCart) => currentCart.filter((item) => item.id !== id));
   };
 
-  const handleCompleteOrder = async () => {
-    if (!cart.length) return;
-
-    // 1. Validation
-    if (mode === "Pre-Order" && (!customerName || !pickupDate)) {
-      alert("Please fill in Customer Name and Pick-up Date for Pre-Orders.");
+  // Trigger para sa pagbubukas ng Review Modal na may validation muna para sa Pre-Order
+  const handleOpenReviewModal = () => {
+    if (!cart.length) {
+      alert("Please add items to cart first.");
       return;
     }
+
+    // Strictly check kung Pre-Order para masigurong Kumpleto ang lahat ng input fields
+    if (mode === "Pre-Order") {
+      if (!customerName.trim() || !phoneNumber.trim() || !pickupDate || !pickupTime) {
+        alert("Lahat ng fields sa Customer Details (Customer Name, Phone Number, Pick-up Date, at Pick-up Time) ay kinakailangan para sa Pre-Order!");
+        setShowCustomerDetails(true); // Buksan ang accordion para makita nila ang unfiled inputs
+        return;
+      }
+    }
+
+    setShowReviewModal(true);
+  };
+
+  const handleCompleteOrder = async () => {
+    if (!cart.length) return;
 
     // 2. Prepare Payload
     const payload = {
@@ -202,6 +216,7 @@ export default function POSPage() {
       setPhoneNumber("");
       setPickupDate("");
       setPickupTime("");
+      alert("Order successfully saved to database!");
 
     } catch (err) {
       console.error("Order error:", err);
@@ -281,14 +296,14 @@ export default function POSPage() {
                   <button
                     type="button"
                     onClick={() => setShowCustomerDetails((prev) => !prev)}
-                    className="w-full flex items-center gap-2 px-5 py-4"
+                    className="w-full flex items-center gap-2 px-5 py-4 cursor-pointer"
                   >
                     <User size={15} className="text-[#8d6459]" />
                     <span className="text-xs font-extrabold tracking-[.4px] text-[#8d6459] uppercase">
                       Customer Details
                     </span>
                     <span className="text-xs font-semibold text-red-500">
-                      · Required
+                      · All Required
                     </span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -311,20 +326,32 @@ export default function POSPage() {
                   {showCustomerDetails && (
                     <div className="px-5 pb-5 space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input
-                          type="tel"
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          placeholder="Phone Number"
-                          className="w-full border border-[#F0DFDA] rounded-lg px-3 py-2.5 text-sm"
-                        />
-                        <input
-                          type="text"
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          placeholder="Customer Name *"
-                          className="w-full border border-[#F0DFDA] rounded-lg px-3 py-2.5 text-sm"
-                        />
+                        <div>
+                          <label className="block text-[10px] font-extrabold uppercase tracking-wide text-[#8d6459] mb-1">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="tel"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            placeholder="Phone Number *"
+                            required
+                            className="w-full border border-[#F0DFDA] rounded-lg px-3 py-2.5 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-extrabold uppercase tracking-wide text-[#8d6459] mb-1">
+                            Customer Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            placeholder="Customer Name *"
+                            required
+                            className="w-full border border-[#F0DFDA] rounded-lg px-3 py-2.5 text-sm"
+                          />
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -336,17 +363,19 @@ export default function POSPage() {
                             type="date"
                             value={pickupDate}
                             onChange={(e) => setPickupDate(e.target.value)}
+                            required
                             className="w-full border border-[#F0DFDA] rounded-lg px-3 py-2.5 text-sm"
                           />
                         </div>
                         <div>
                           <label className="block text-[10px] font-extrabold uppercase tracking-wide text-[#8d6459] mb-1">
-                            Pick-up Time
+                            Pick-up Time *
                           </label>
                           <input
                             type="time"
                             value={pickupTime}
                             onChange={(e) => setPickupTime(e.target.value)}
+                            required
                             className="w-full border border-[#F0DFDA] rounded-lg px-3 py-2.5 text-sm"
                           />
                         </div>
@@ -374,7 +403,7 @@ export default function POSPage() {
                   total={total}
                   updateQuantity={updateQuantity}
                   removeItem={removeItem}
-                  onCompleteOrder={() => setShowReviewModal(true)}
+                  onCompleteOrder={handleOpenReviewModal}
                   completeLabel={
                     mode === "Pre-Order"
                       ? "Confirm Pre-Order"
@@ -396,7 +425,8 @@ export default function POSPage() {
             <div className="space-y-2 mb-4 text-sm text-[#6f5148]">
               <p><strong>Order Type:</strong> {mode === "Pre-Order" ? "Pre-Order" : "Buy Now"}</p>
               <p><strong>Payment Type:</strong> Cash</p>
-              {customerName && <p><strong>Customer:</strong> {customerName}</p>}
+              {customerName && <p><strong>Customer:</strong> {customerName} ({phoneNumber})</p>}
+              {mode === "Pre-Order" && <p><strong>Pick-up:</strong> {pickupDate} at {pickupTime}</p>}
 
               <div className="border-t border-b border-[#F0DFDA] py-2 my-2 max-h-40 overflow-y-auto">
                 <strong className="block mb-1 text-[#2B1C16]">Ordered Items:</strong>
@@ -445,7 +475,7 @@ export default function POSPage() {
                   setShowReviewModal(false);
                   setCashTendered("");
                 }}
-                className="px-4 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+                className="px-4 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -453,7 +483,7 @@ export default function POSPage() {
                 type="button"
                 disabled={(Number(cashTendered) || 0) < total}
                 onClick={handleCompleteOrder}
-                className="px-4 py-2.5 bg-[#3D2A22] text-white font-semibold rounded-xl hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 bg-[#3D2A22] text-white font-semibold rounded-xl hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Finalize Transaction
               </button>
