@@ -16,6 +16,8 @@ test: {
     './test/mockAPI.js'
 
   ],
+  include: ['test/**/*.test.jsx'],  
+  exclude: ['tests/**'],            
 
 }
 })

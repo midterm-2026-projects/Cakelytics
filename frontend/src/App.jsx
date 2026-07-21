@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { getToken } from './services/api'; 
 
 import LoginPage from './pages/LoginPage';
 import POSPage from './pages/PosPage/POSPage';
@@ -36,11 +37,12 @@ function PagePreview({ children }) {
 }
 
 //  ITO YUNG BYPASS SWITCH MO 
-const BYPASS_LOGIN = true;
+const BYPASS_LOGIN = false;
 
 //  ITO ANG PROTECTOR NG MGA ADMIN PAGES
 function ProtectedAdminRoute({ children }) {
-  const isAuthenticated = BYPASS_LOGIN; 
+   const isAuthenticated =
+    import.meta.env.MODE === 'test' ? true : (BYPASS_LOGIN || !!getToken());  // ← BINAGO
   
   //  IDINAGDAG: Kukunin natin si navigate para magamit sa logout
   const navigate = useNavigate(); 
@@ -136,6 +138,25 @@ export default function App() {
               </div>
             } 
           />
+
+
+            <Route 
+            path="*" 
+            element={
+              <div className="flex flex-col items-center justify-center min-h-screen text-center bg-stone-50">
+                <h1 className="text-4xl font-bold text-red-500 mb-2">404</h1>
+                <h2 className="text-2xl font-semibold text-stone-800 mb-4">Page Not Found</h2>
+                <p className="text-stone-500 mb-6">Sorry, the page you are looking for does not exist.</p>
+                <button 
+                  onClick={() => window.location.href = '/'}
+                  className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-bold"
+                >
+                  Go Back Home
+                </button>
+              </div>
+            } 
+          />
+          
 
         </Routes>
       </ToastProvider>
