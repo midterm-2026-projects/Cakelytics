@@ -8,7 +8,7 @@ const { errorHandler } = require('../../../src/middleware/errorHandler.js');
 
 const app = express();
 app.use(express.json());
-app.use('/api/inventory/products', productRoutes);
+app.use('/api/products', productRoutes);
 app.use(errorHandler);
 
 describe('Product Routes Integration', () => {
@@ -24,11 +24,11 @@ describe('Product Routes Integration', () => {
   });
 
   // ── GET ALL ──────────────────────────────────────
-  describe('GET /api/inventory/products', () => {
+  describe('GET /api/products', () => {
     it('should return 200 and fetch all products', async () => {
       vi.spyOn(ProductService, 'getProducts').mockResolvedValue(mockProductList);
 
-      const res = await request(app).get('/api/inventory/products');
+      const res = await request(app).get('/api/products');
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -38,7 +38,7 @@ describe('Product Routes Integration', () => {
     it('should return 500 when service throws an error', async () => {
       vi.spyOn(ProductService, 'getProducts').mockRejectedValue(new Error('DB error'));
 
-      const res = await request(app).get('/api/inventory/products');
+      const res = await request(app).get('/api/products');
 
       expect(res.status).toBe(500);
       expect(res.body.success).toBe(false);
@@ -46,11 +46,11 @@ describe('Product Routes Integration', () => {
   });
 
   // ── GET BY ID ─────────────────────────────────────
-  describe('GET /api/inventory/products/:id', () => {
+  describe('GET /api/products/:id', () => {
     it('should return 200 and fetch a single product by id', async () => {
       vi.spyOn(ProductService, 'getProductById').mockResolvedValue(mockProduct);
 
-      const res = await request(app).get(`/api/inventory/products/${fakeId}`);
+      const res = await request(app).get(`/api/products/${fakeId}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -60,7 +60,7 @@ describe('Product Routes Integration', () => {
     it('should return 404 when product is not found', async () => {
       vi.spyOn(ProductService, 'getProductById').mockResolvedValue(null);
 
-      const res = await request(app).get(`/api/inventory/products/${fakeId}`);
+      const res = await request(app).get(`/api/products/${fakeId}`);
 
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
@@ -72,7 +72,7 @@ describe('Product Routes Integration', () => {
       err.status = 404;
       vi.spyOn(ProductService, 'getProductById').mockRejectedValue(err);
 
-      const res = await request(app).get(`/api/inventory/products/${fakeId}`);
+      const res = await request(app).get(`/api/products/${fakeId}`);
 
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
@@ -81,7 +81,7 @@ describe('Product Routes Integration', () => {
     it('should return 500 on unexpected service error', async () => {
       vi.spyOn(ProductService, 'getProductById').mockRejectedValue(new Error('Unexpected'));
 
-      const res = await request(app).get(`/api/inventory/products/${fakeId}`);
+      const res = await request(app).get(`/api/products/${fakeId}`);
 
       expect(res.status).toBe(500);
       expect(res.body.success).toBe(false);
@@ -89,13 +89,13 @@ describe('Product Routes Integration', () => {
   });
 
   // ── CREATE ────────────────────────────────────────
-  describe('POST /api/inventory/products', () => {
+  describe('POST /api/products', () => {
     it('should return 201 and create a product with valid payload', async () => {
       vi.spyOn(ProductService, 'createProduct').mockResolvedValue(mockProduct);
 
       const newProduct = { name: 'Ube Cake', category: 'Cakes', price: 250 };
       const res = await request(app)
-        .post('/api/inventory/products')
+        .post('/api/products')
         .send(newProduct);
 
       expect(res.status).toBe(201);
@@ -109,7 +109,7 @@ describe('Product Routes Integration', () => {
       vi.spyOn(ProductService, 'createProduct').mockRejectedValue(err);
 
       const res = await request(app)
-        .post('/api/inventory/products')
+        .post('/api/products')
         .send({});
 
       expect(res.status).toBe(400);
@@ -120,7 +120,7 @@ describe('Product Routes Integration', () => {
       vi.spyOn(ProductService, 'createProduct').mockRejectedValue(new Error('DB error'));
 
       const res = await request(app)
-        .post('/api/inventory/products')
+        .post('/api/products')
         .send({ name: 'Test' });
 
       expect(res.status).toBe(500);
@@ -129,13 +129,13 @@ describe('Product Routes Integration', () => {
   });
 
   // ── UPDATE ────────────────────────────────────────
-  describe('PUT /api/inventory/products/:id', () => {
+  describe('PUT /api/products/:id', () => {
     it('should return 200 and update an existing product', async () => {
       const updatedProduct = { ...mockProduct, name: 'Updated Ube Cake', price: 300 };
       vi.spyOn(ProductService, 'updateProduct').mockResolvedValue(updatedProduct);
 
       const res = await request(app)
-        .put(`/api/inventory/products/${fakeId}`)
+        .put(`/api/products/${fakeId}`)
         .send({ name: 'Updated Ube Cake', price: 300 });
 
       expect(res.status).toBe(200);
@@ -149,7 +149,7 @@ describe('Product Routes Integration', () => {
       vi.spyOn(ProductService, 'updateProduct').mockRejectedValue(err);
 
       const res = await request(app)
-        .put(`/api/inventory/products/${fakeId}`)
+        .put(`/api/products/${fakeId}`)
         .send({ name: 'Updated Cake', price: 300 });
 
       expect(res.status).toBe(404);
@@ -160,7 +160,7 @@ describe('Product Routes Integration', () => {
       vi.spyOn(ProductService, 'updateProduct').mockRejectedValue(new Error('DB error'));
 
       const res = await request(app)
-        .put(`/api/inventory/products/${fakeId}`)
+        .put(`/api/products/${fakeId}`)
         .send({ name: 'Test' });
 
       expect(res.status).toBe(500);
@@ -169,11 +169,11 @@ describe('Product Routes Integration', () => {
   });
 
   // ── DELETE ────────────────────────────────────────
-  describe('DELETE /api/inventory/products/:id', () => {
+  describe('DELETE /api/products/:id', () => {
     it('should return 200 and delete an existing product', async () => {
       vi.spyOn(ProductService, 'deleteProduct').mockResolvedValue(mockProduct);
 
-      const res = await request(app).delete(`/api/inventory/products/${fakeId}`);
+      const res = await request(app).delete(`/api/products/${fakeId}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -184,7 +184,7 @@ describe('Product Routes Integration', () => {
       err.status = 404;
       vi.spyOn(ProductService, 'deleteProduct').mockRejectedValue(err);
 
-      const res = await request(app).delete(`/api/inventory/products/${fakeId}`);
+      const res = await request(app).delete(`/api/products/${fakeId}`);
 
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
@@ -193,7 +193,7 @@ describe('Product Routes Integration', () => {
     it('should return 500 on unexpected service error', async () => {
       vi.spyOn(ProductService, 'deleteProduct').mockRejectedValue(new Error('DB error'));
 
-      const res = await request(app).delete(`/api/inventory/products/${fakeId}`);
+      const res = await request(app).delete(`/api/products/${fakeId}`);
 
       expect(res.status).toBe(500);
       expect(res.body.success).toBe(false);

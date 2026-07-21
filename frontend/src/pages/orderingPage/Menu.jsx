@@ -29,7 +29,7 @@ export default function Menu() {
     const fetchProducts = async () => {
       try {
         // Palitan ang URL na ito base sa tamang endpoint ng inyong Products API
-        const response = await axios.get("http://localhost:3000/api/inventory/products");
+        const response = await axios.get("http://localhost:3000/api/products");
         
         // I-map ang database structure kung magkaiba ang pangalan ng field (hal. image_url -> image)
         const liveProducts = (response.data.data || response.data).map(prod => ({

@@ -291,7 +291,7 @@ OrderService.createOrderWithItems = async (body) => {
     balance,
     pickup_date: body.pickup_date || null,
     pickup_time: body.pickup_time || null,
-    special_instructions: body.special_instructions || null,
+    special_instructions: body.special_instructions || '',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
