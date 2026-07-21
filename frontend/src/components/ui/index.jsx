@@ -2,7 +2,7 @@
 // REUSABLE UI COMPONENTS — Aileen & Niculus POS
 // ============================================================
 /* eslint-disable react-refresh/only-export-components */
-import { useState, createContext, useContext } from 'react';
+import { useState, createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom'; // Dinagdag para sa Portal fix[cite: 13]
 import { X, Search, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 
@@ -213,11 +213,30 @@ const ToastContext = createContext(null);
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
+  const timersRef = useRef(new Set());
+
   const show = (message, type = 'success') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3200);
+
+    const timerId = setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+      timersRef.current.delete(timerId);
+    }, 3200);
+
+    timersRef.current.add(timerId);
   };
+
+  // Kanselahin lahat ng natitirang timer kapag nag-unmount ang provider
+  // (hal. sa dulo ng bawat test), para hindi na sumubok mag-set ng state
+  // matapos matanggal ang component sa DOM.
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(timerId => clearTimeout(timerId));
+      timersRef.current.clear();
+    };
+  }, []);
+
   return (
     <ToastContext.Provider value={{ show }}>
       {children}
