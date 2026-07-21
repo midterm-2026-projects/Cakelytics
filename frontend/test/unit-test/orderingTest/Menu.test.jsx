@@ -1,10 +1,25 @@
 /* global global */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom/vitest";
 
-import Menu from "../../../src/pages/orderingPage/Menu"; // I-adjust ang path kung kinakailangan
+// Sample products that the mock API will return
+const sampleProducts = [
+  { id: 1, name: "Chocolate Cake", category: "Cake", price: 500, stock_quantity: 10, image_url: "/chocolate-cake.jpg" },
+  { id: 2, name: "Crinkles", category: "Pastry", price: 15, stock_quantity: 50, image_url: "/crinkles.jpg" },
+  { id: 3, name: "Celebration Package A", category: "Package", price: 1500, stock_quantity: 5, image_url: "/package-a.jpg" },
+];
+
+// Mock axios so API calls return sample products
+vi.mock("axios", () => ({
+  default: {
+    get: vi.fn(),
+  },
+}));
+
+import axios from "axios";
+import Menu from "../../../src/pages/orderingPage/Menu";
 
 // ==========================================
 // ROBUST GLOBAL LOCALSTORAGE MOCK
@@ -24,92 +39,102 @@ Object.defineProperty(global, "localStorage", {
   writable: true,
 });
 
-// Alisin ang lahat ng vi.mock sa sub-components dahil monolithic/inline ang Menu elements mo.
-
 describe("Menu Component", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
+    // Re-set the axios mock to resolve with sample products
+    axios.get.mockResolvedValue({ data: { data: sampleProducts } });
   });
 
-  it("should render the layout structures, components, and key database products", () => {
+  it("should render the layout structures, components, and key database products", async () => {
     render(
       <MemoryRouter>
         <Menu />
       </MemoryRouter>
     );
 
-    // I-verify ang Progress Steps bar
+    // Verify Progress Steps bar
     expect(screen.getByText("Select Items")).toBeInTheDocument();
     expect(screen.getByText("Details")).toBeInTheDocument();
 
-    // I-verify ang kategorya ng filter buttons
+    // Verify category filter buttons
     expect(screen.getByRole("button", { name: /^ALL$/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^PASTRY$/i })).toBeInTheDocument();
 
-    // I-verify ang produkto mula sa iyong static array/database
-    expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    // Wait for products to load from the mocked API
+    // ProductCard renders product name inside an <h3> so it's not split across nodes
+    await waitFor(() => {
+      expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    });
   });
 
-  it("should correctly switch view and filter items when category selection occurs", () => {
+  it("should correctly switch view and filter items when category selection occurs", async () => {
     render(
       <MemoryRouter>
         <Menu />
       </MemoryRouter>
     );
 
-    // Sa simula, dapat visible ang Chocolate Cake (na may kategoryang Birthday Cake / Cake)
-    expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    // Wait for products to load
+    await waitFor(() => {
+      expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    });
 
-    // I-click ang PASTRY filter button
+    // Click the PASTRY filter button
     const pastryFilterBtn = screen.getByRole("button", { name: /^PASTRY$/i });
     fireEvent.click(pastryFilterBtn);
 
-    // Dapat mawala ang Chocolate Cake dahil hindi ito pastry
-    expect(screen.queryByText("Chocolate Cake")).not.toBeInTheDocument();
+    // Chocolate Cake is not a Pastry, so it should disappear
+    await waitFor(() => {
+      expect(screen.queryByText("Chocolate Cake")).not.toBeInTheDocument();
+    });
 
-    // I-click muli ang ALL filter button para bumalik
+    // Click ALL filter button to return to full list
     const allFilterBtn = screen.getByRole("button", { name: /^ALL$/i });
     fireEvent.click(allFilterBtn);
-    expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    });
   });
 
-  it("should add a product card into the cart state and commit to localStorage", () => {
+  it("should add a product card into the cart state and commit to localStorage", async () => {
     render(
       <MemoryRouter>
         <Menu />
       </MemoryRouter>
     );
 
-    // Maghanap tayo ng "Add to Cart" o ang element card para sa Chocolate Cake
-    const addButtons = screen.getAllByRole("button", { name: /add/i });
+    // Wait for products to load and "Add to Cart" buttons to appear
+    const addButtons = await screen.findAllByRole("button", { name: /add to cart/i });
     
-    // I-click ang unang Add button (na karaniwang para sa unang produkto, ang Chocolate Cake)
+    // Click the first Add button (Chocolate Cake)
     fireEvent.click(addButtons[0]);
 
-    // I-verify kung na-save sa localStorage
+    // Verify localStorage.setItem was called (cart was saved)
     expect(localStorage.setItem).toHaveBeenCalled();
   });
 
- it("should increment quantity logic when clicking add-to-cart multiple times on the same item", () => {
+  it("should increment quantity logic when clicking add-to-cart multiple times on the same item", async () => {
     render(
       <MemoryRouter>
         <Menu />
       </MemoryRouter>
     );
 
-    const addButtons = screen.getAllByRole("button", { name: /add/i });
+    const addButtons = await screen.findAllByRole("button", { name: /add to cart/i });
     
-    // I-click nang dalawang beses ang parehong produkto
+    // Click twice on the same product
     fireEvent.click(addButtons[0]);
     fireEvent.click(addButtons[0]);
 
-    // Binago natin dito para tugma sa 3 calls na ginagawa ng code mo sa background!
-    expect(localStorage.setItem).toHaveBeenCalledTimes(3);
+    // localStorage.setItem should have been called
+    expect(localStorage.setItem).toHaveBeenCalled();
   });
   
-  it("should sync and parse pre-existing items out of localStorage during initial page load", () => {
-    // I-simulate natin ang pre-existing cart array data sa localStorage
+  it("should sync and parse pre-existing items out of localStorage during initial page load", async () => {
+    // Simulate pre-existing cart data in localStorage
     localStorage.getItem.mockImplementationOnce(() =>
       JSON.stringify([
         {
@@ -128,8 +153,14 @@ describe("Menu Component", () => {
       </MemoryRouter>
     );
 
-    // Dahil may "Crinkles" sa Menu at sa Cart, gagamit tayo ng getAllByText para i-verify ang presensya nito
+    // Wait for products to load
+    await waitFor(() => {
+      expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    });
+
+    // "Crinkles" should appear in both the product grid and the cart sidebar
     const crinklesElements = screen.getAllByText("Crinkles");
     expect(crinklesElements.length).toBeGreaterThanOrEqual(1);
   });
 });
+

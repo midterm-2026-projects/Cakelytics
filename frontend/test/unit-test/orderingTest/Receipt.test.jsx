@@ -1,6 +1,5 @@
 //@vitest-environment jsdom
 
-import React from "react";
 import {
   describe,
   it,
@@ -19,18 +18,6 @@ import "@testing-library/jest-dom/vitest";
 import { MemoryRouter } from "react-router-dom";
 
 // --------------------
-// Mock html-to-image FIRST
-// --------------------
-vi.mock("html-to-image", () => ({
-  toPng: vi.fn(() =>
-    Promise.resolve("data:image/png;base64,mock")
-  ),
-}));
-
-import { toPng } from "html-to-image";
-import Receipt from "../../../src/pages/orderingPage/Receipt";
-
-// --------------------
 // Mock Navigate
 // --------------------
 const mockNavigate = vi.fn();
@@ -45,20 +32,6 @@ vi.mock("react-router-dom", async () => {
 });
 
 // --------------------
-// Mock OrderProgress
-// --------------------
-vi.mock(
-  "../../../src/components/orderingComponents/OrderProgress",
-  () => ({
-    default: () => (
-      <div data-testid="order-progress">
-        Order Progress
-      </div>
-    ),
-  })
-);
-
-// --------------------
 // localStorage Mock
 // --------------------
 const localStorageMock = (() => {
@@ -66,15 +39,12 @@ const localStorageMock = (() => {
 
   return {
     getItem: vi.fn((key) => store[key] ?? null),
-
     setItem: vi.fn((key, value) => {
       store[key] = value.toString();
     }),
-
     removeItem: vi.fn((key) => {
       delete store[key];
     }),
-
     clear: vi.fn(() => {
       store = {};
     }),
@@ -86,49 +56,28 @@ Object.defineProperty(window, "localStorage", {
   writable: true,
 });
 
-// --------------------
-// Preserve createElement
-// --------------------
-const originalCreateElement =
-  document.createElement.bind(document);
+import Receipt from "../../../src/pages/orderingPage/Receipt";
 
 describe("Receipt Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
     window.localStorage.clear();
-
     window.alert = vi.fn();
-
     mockNavigate.mockClear();
-
-    vi.spyOn(document, "createElement").mockImplementation((tag) => {
-      if (tag === "a") {
-        return {
-          click: vi.fn(),
-          set href(value) {},
-          set download(value) {},
-        };
-      }
-
-      return originalCreateElement(tag);
-    });
 
     window.localStorage.setItem(
       "orderData",
       JSON.stringify({
-        orderNumber: "ORD-1001",
-        dateCreated: "07/01/2026",
         name: "Juan Dela Cruz",
         contact: "09123456789",
         paymentType: "deposit",
-        total: 1000,
-        deposit: 500,
-        items: [
+        subtotal: 1000,
+        order_number: "ORD-1001",
+        cartItems: [
           {
             id: 1,
             name: "Chocolate Cake",
-            qty: 2,
+            quantity: 2,
             price: 500,
           },
         ],
@@ -150,10 +99,6 @@ describe("Receipt Component", () => {
     expect(
       await screen.findByText("Order Placed!")
     ).toBeInTheDocument();
-
-    expect(
-      screen.getByTestId("order-progress")
-    ).toBeInTheDocument();
   });
 
   it("should display order information", async () => {
@@ -163,100 +108,95 @@ describe("Receipt Component", () => {
       </MemoryRouter>
     );
 
+    await screen.findByText("Order Placed!");
+
+    // ORD-1001 appears in order number and dbId
+    const orderNos = screen.getAllByText((content) => content.includes("ORD-1001"));
+    expect(orderNos.length).toBeGreaterThanOrEqual(1);
+
+    // Customer info rendered with uppercase CSS class
     expect(
-      await screen.findByText("ORD-1001")
+      screen.getByText((content) => content.includes("Juan Dela Cruz"))
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText("Juan Dela Cruz")
+      screen.getByText((content) => content.includes("09123456789"))
     ).toBeInTheDocument();
 
+    // Items rendered (split text: "2 × Chocolate Cake")
     expect(
-      screen.getByText("09123456789")
+      screen.getByText((content) => content.includes("Chocolate Cake"))
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByText(/Chocolate Cake/i)
-    ).toBeInTheDocument();
+    // Total amount
+    const totals = screen.getAllByText((content) => content.includes("1000.00"));
+    expect(totals.length).toBeGreaterThanOrEqual(1);
 
+    // Payment type
     expect(
-      screen.getAllByText("₱1000.00").length
-    ).toBeGreaterThan(0);
-
-    expect(
-      screen.getByText("50% Deposit")
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByText("₱500.00")
+      screen.getByText(/50% Deposit/i)
     ).toBeInTheDocument();
   });
 
-  it("should save receipt image", async () => {
+  it("should download receipt and unlock navigation buttons", async () => {
+    // Mock URL.createObjectURL to prevent actual blob URL creation
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-url");
+
     render(
       <MemoryRouter>
         <Receipt />
       </MemoryRouter>
     );
 
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: /save receipt as image/i,
-      })
-    );
+    await screen.findByText("Order Placed!");
+
+    const downloadBtn = screen.getByRole("button", { name: /download/i });
+    fireEvent.click(downloadBtn);
 
     await waitFor(() => {
-      expect(toPng).toHaveBeenCalled();
-    });
-  });
-
-  it("should not leave if receipt is not saved", async () => {
-    render(
-      <MemoryRouter>
-        <Receipt />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: /back to home/i,
-      })
-    );
-
-    expect(window.alert).toHaveBeenCalledWith(
-      "Please save your receipt before leaving."
-    );
-
-    expect(mockNavigate).not.toHaveBeenCalled();
-  });
-
-  it("should navigate home after saving receipt", async () => {
-    render(
-      <MemoryRouter>
-        <Receipt />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: /save receipt as image/i,
-      })
-    );
-
-    await waitFor(() => {
-      expect(toPng).toHaveBeenCalled();
+      expect(screen.getByRole("button", { name: /back to home/i })).not.toBeDisabled();
     });
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /back to home/i,
-      })
-    );
-
+    fireEvent.click(screen.getByRole("button", { name: /back to home/i }));
     expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 
-  it("should show loading when no order exists", () => {
+  it("should not allow navigation before saving receipt", async () => {
+    render(
+      <MemoryRouter>
+        <Receipt />
+      </MemoryRouter>
+    );
+
+    await screen.findByText("Order Placed!");
+
+    expect(screen.getByRole("button", { name: /order again/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /back to home/i })).toBeDisabled();
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("should navigate to menu after saving receipt", async () => {
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-url");
+
+    render(
+      <MemoryRouter>
+        <Receipt />
+      </MemoryRouter>
+    );
+
+    await screen.findByText("Order Placed!");
+
+    fireEvent.click(screen.getByRole("button", { name: /download/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /order again/i })).not.toBeDisabled();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /order again/i }));
+    expect(mockNavigate).toHaveBeenCalledWith("/menu");
+  });
+
+  it("should show receipt even when no order exists (defaults)", async () => {
     window.localStorage.clear();
 
     render(
@@ -265,8 +205,13 @@ describe("Receipt Component", () => {
       </MemoryRouter>
     );
 
-    expect(
-      screen.getByText(/loading receipt/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Order Placed!")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText((content) => content.includes("No item summary"))
+      ).toBeInTheDocument();
+    });
   });
 });
+
