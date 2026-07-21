@@ -28,6 +28,10 @@ app.use((req, res, next) => {
   next(); // Importante: Huwag kalimutan ito para magpatuloy ang request 
 });
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.get('/', (req, res) => { 
   res.json({ status: 'CakeLytics backend is running' }); 
 });
