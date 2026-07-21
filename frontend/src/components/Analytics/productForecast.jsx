@@ -1,6 +1,6 @@
 import { TrendingUp } from 'lucide-react';
 
-// DYNAMIC MOCK DATA BASE SA TIMEFRAME (Final Products na!)
+// DYNAMIC MOCK DATA BASE SA TIMEFRAME (fallback lang kapag walang data prop pa)
 const FORECAST_DATA = {
   '7d': {
     label: 'Next 7 Days',
@@ -24,8 +24,8 @@ const FORECAST_DATA = {
       { name: 'Vanilla Roll', pct: -8, diff: -5, forecast: 57 },
     ]
   },
-  '90d': {
-    label: 'Next 90 Days',
+  '60d': {
+    label: 'Next 60 Days',
     growth: [
       { name: 'Mocha Dedication Cake', pct: 25, diff: 45, forecast: 310 },
       { name: 'Custom Fondant Cakes', pct: 18, diff: 28, forecast: 165 },
@@ -37,9 +37,23 @@ const FORECAST_DATA = {
   }
 };
 
-export default function ProductForecasting({ view = '30d' }) {
-  // Kunin ang tamang data base sa prop na ipinasa ni AnalyticsPage
-  const currentData = FORECAST_DATA[view] || FORECAST_DATA['30d'];
+  const EmptyRow = ({ text }) => (
+    <div role="status" className="flex items-center justify-center flex-1 p-3 border border-dashed border-brand-200 rounded-xl min-h-[50px] text-center">
+      <p className="text-[12px] text-brand-400">{text}</p>
+    </div>
+  );
+
+export default function ProductForecasting({ data, view = '30d' }) {
+  // Gamitin ang totoong data mula sa backend kung meron.
+  const hasRealData = data && (Array.isArray(data.growth) || Array.isArray(data.risk));
+
+  const currentData = hasRealData
+    ? {
+        label: data.label || FORECAST_DATA[view]?.label || FORECAST_DATA['30d'].label,
+        growth: data.growth || [],
+        risk: data.risk || [],
+      }
+    : (FORECAST_DATA[view] || FORECAST_DATA['30d']);
 
   const renderMiniSparkline = (trend) => {
     const isUp = trend === 'up';
@@ -55,6 +69,8 @@ export default function ProductForecasting({ view = '30d' }) {
       </svg>
     );
   };
+
+
 
   return (
     <div className="w-full bg-white border border-brand-200 rounded-2xl shadow-sm flex flex-col p-4 sm:p-5 h-full">
@@ -79,18 +95,24 @@ export default function ProductForecasting({ view = '30d' }) {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /> Lumalagong Products
           </h4>
           <div className="flex flex-col flex-1 gap-2">
-            {currentData.growth.map((item, i) => (
-              <div key={i} className="flex items-center justify-between flex-1 p-3 border border-emerald-100 bg-emerald-50/30 rounded-xl gap-3 min-h-[50px] transition-all hover:bg-emerald-50/60">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-bold text-brand-900 truncate">{item.name}</p>
-                  <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">+{item.diff} pcs</p>
+            {currentData.growth.length === 0 ? (
+              <EmptyRow text="No trending products detected for this period." />
+            ) : (
+              currentData.growth.map((item, i) => (
+                <div key={i} className="flex items-center justify-between flex-1 p-3 border border-emerald-100 bg-emerald-50/30 rounded-xl gap-3 min-h-[50px] transition-all hover:bg-emerald-50/60">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-brand-900 truncate">{item.name}</p>
+                    <p className="text-[11px] text-emerald-700 mt-0.5">
+                      Forecast: <span className="font-bold">{item.forecast} pcs</span> <span className="opacity-80">(+{item.diff})</span>
+                    </p>
+                  </div>
+                  {renderMiniSparkline('up')}
+                  <span className="shrink-0 px-2 py-1 bg-emerald-100 text-emerald-800 text-[12px] font-extrabold rounded-md">
+                    +{item.pct}%
+                  </span>
                 </div>
-                {renderMiniSparkline('up')}
-                <span className="shrink-0 px-2 py-1 bg-emerald-100 text-emerald-800 text-[12px] font-extrabold rounded-md">
-                  +{item.pct}%
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -100,18 +122,24 @@ export default function ProductForecasting({ view = '30d' }) {
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" /> At Risk Products
           </h4>
           <div className="flex flex-col flex-1 gap-2">
-            {currentData.risk.map((item, i) => (
-              <div key={i} className="flex items-center justify-between flex-1 p-3 border border-rose-100 bg-rose-50/30 rounded-xl gap-3 min-h-[50px] transition-all hover:bg-rose-50/60">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-bold text-brand-900 truncate">{item.name}</p>
-                  <p className="text-[11px] text-rose-600 font-semibold mt-0.5">{item.diff} pcs</p>
+            {currentData.risk.length === 0 ? (
+              <EmptyRow text="No at-risk products detected for this period." />
+            ) : (
+              currentData.risk.map((item, i) => (
+                <div key={i} className="flex items-center justify-between flex-1 p-3 border border-rose-100 bg-rose-50/30 rounded-xl gap-3 min-h-[50px] transition-all hover:bg-rose-50/60">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-brand-900 truncate">{item.name}</p>
+                    <p className="text-[11px] text-rose-700 mt-0.5">
+                      Forecast: <span className="font-bold">{item.forecast} pcs</span> <span className="opacity-80">({item.diff})</span>
+                    </p>
+                  </div>
+                  {renderMiniSparkline('down')}
+                  <span className="shrink-0 px-2 py-1 bg-rose-100 text-rose-800 text-[12px] font-extrabold rounded-md">
+                    {item.pct}%
+                  </span>
                 </div>
-                {renderMiniSparkline('down')}
-                <span className="shrink-0 px-2 py-1 bg-rose-100 text-rose-800 text-[12px] font-extrabold rounded-md">
-                  {item.pct}%
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

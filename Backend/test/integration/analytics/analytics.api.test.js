@@ -172,69 +172,6 @@ describe('FourKPI Routes Integration', () => {
 
 
 // ==========================================
-// 3. Heatmap Routes Integration
-// ==========================================
-describe('Heatmap Routes Integration', () => {
-  const WEEK_START_CASES = [
-    { label: 'a Monday week start', weekStart: '2026-07-06' },
-    { label: 'a mid-week date (Wednesday)', weekStart: '2026-07-08' },
-    { label: 'a week start that crosses a month boundary', weekStart: '2026-07-27' },
-    { label: 'a week start that crosses a year boundary', weekStart: '2025-12-29' },
-  ];
-  
-  // 8 time slots x 7 days, matching buildHeatmapMatrix's output shape
-  const fakeMatrix = Array.from({ length: 8 }, () => Array(7).fill(0));
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  // TEST 1: Token Validation (401 Unauthorized)
-  it('should return 401 when the token is missing or invalid', async () => {
-    const res = await request(app).get('/api/heatmap/2026-07-06');
-    expect(res.status).toBe(401);
-  });
-
-  // TEST 2: All Timeframes (200 OK)
-  it.each(WEEK_START_CASES)('should return 200 and an 8x7 matrix for $label', async ({ weekStart }) => {
-    vi.spyOn(HeatmapService, 'getOrderVolumeByTimeframe').mockResolvedValue(fakeMatrix);
-
-    const res = await request(app)
-      .get(`/api/heatmap/${encodeURIComponent(weekStart)}`)
-      .set('Authorization', 'Bearer valid-token');
-
-    expect(res.status).toBe(200);
-    expect(HeatmapService.getOrderVolumeByTimeframe).toHaveBeenCalledWith(weekStart);
-  });
-
-  // TEST 3: No Data Found (404 Not Found)
-  it('should return 404 when no heatmap data is found', async () => {
-    const notFoundErr = new Error('Walang nakitang heatmap data para sa linggong ito');
-    notFoundErr.statusCode = 404;
-
-    vi.spyOn(HeatmapService, 'getOrderVolumeByTimeframe').mockRejectedValue(notFoundErr);
-
-    const res = await request(app)
-      .get('/api/heatmap/2026-07-06')
-      .set('Authorization', 'Bearer valid-token');
-
-    expect(res.status).toBe(404);
-  });
-
-  // TEST 4: Database Failure (500 Internal Server Error)
-  it('should return 500 when the database fails unexpectedly', async () => {
-    vi.spyOn(HeatmapService, 'getOrderVolumeByTimeframe').mockRejectedValue(new Error('Failed to fetch heatmap data from database'));
-
-    const res = await request(app)
-      .get('/api/heatmap/2026-07-06')
-      .set('Authorization', 'Bearer valid-token');
-
-    expect(res.status).toBe(500);
-  });
-});
-
-
-// ==========================================
 // 4. ProductForecast Routes Integration
 // ==========================================
 describe('ProductForecast Routes Integration', () => {

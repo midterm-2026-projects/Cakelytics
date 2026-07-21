@@ -2,7 +2,6 @@ const { ok } = require('../utils/response.js');
 const { 
   ActionableRecommendationService, 
   FourKpiService, 
-  HeatmapService, 
   ProductForecastService, 
   SalesForecastService, 
   StackedBarServices, 
@@ -35,19 +34,6 @@ const FourKpiController = {
       ok(res, result, 'KPI data fetched successfully');
     } catch (err) {
       next(err); 
-    }
-  },
-};
-
-const HeatmapController = {
-  getHeatmapData: async (req, res, next) => {
-    try {
-      const { timeframe } = req.params;
-      const result = await HeatmapService.getOrderVolumeByTimeframe(timeframe);
-      
-      ok(res, result, 'Heatmap data fetched successfully');
-    } catch (err) {
-      next(err);
     }
   },
 };
@@ -108,7 +94,6 @@ const TopProductsController = {
 module.exports = {
   ActionableRecommendationController,
   FourKpiController,
-  HeatmapController,
   ProductForecastController,
   SalesForecastController,
   StackedBarController,
