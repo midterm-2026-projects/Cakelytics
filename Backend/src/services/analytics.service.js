@@ -475,13 +475,32 @@ Historical daily sales data: ${JSON.stringify(historicalSales)}`;
 
 function normalizeSalesPayload(aiResult) {
   const chartData = Array.isArray(aiResult?.chartData) ? aiResult.chartData : [];
+
+  const todayDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+  const realTodayLabel = todayDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  
+  let foundToday = false;
+
   return {
-    chartData: chartData.map((d) => ({
-      label: String(d.label ?? ""),
-      isToday: Boolean(d.isToday),
-      actualSales: d.actualSales === null || d.actualSales === undefined ? null : Number(d.actualSales),
-      forecastSales: d.forecastSales === null || d.forecastSales === undefined ? null : Number(d.forecastSales),
-    })),
+    chartData: chartData.map((d) => {
+      const label = String(d.label ?? "");
+      
+      // 2. WAG MAGTIWALA SA AI! I-set ang isToday base sa totoong label
+      const isToday = (label === realTodayLabel);
+      
+      if (isToday) foundToday = true;
+
+      // Kung hindi pa nahahanap ang Today at hindi ito ang Today, past day ito
+      const isPastDay = !foundToday && !isToday;
+
+      return {
+        label: label,
+        isToday: isToday, 
+        actualSales: d.actualSales === null || d.actualSales === undefined ? null : Number(d.actualSales),
+        // 3. I-force null ang forecast sa past days para iwas overlap
+        forecastSales: isPastDay ? null : (d.forecastSales === null || d.forecastSales === undefined ? null : Number(d.forecastSales)),
+      };
+    }),
   };
 }
 
@@ -489,27 +508,30 @@ const SalesForecastService = {
   async getSalesTrendsByTimeframe(timeframe = "30d", forceRefresh = false) {
     const cacheKey = buildSalesCacheKey(timeframe);
 
-    // Kapag HINDI galing sa cron job (nag-load ang dashboard)
     if (!forceRefresh) {
       const cached = await AnalyticsCacheModel.getByKey(cacheKey);
       if (cached && cached.payload) {
-        
-        const updatedChartData = cached.payload.chartData.map(d => {
-          if (d.isToday) {
-            return {
-              ...d,
-              actualSales: null // Tinanggal na ang actual sales para sa today
-            };
-          }
-          return d;
-        });
-
-        return { chartData: updatedChartData };
+        return { chartData: cached.payload.chartData };
       }
       return { chartData: [] };
     }
-    
-    // (Ang cron job logic sa ibaba ay mananatiling pareho)
+
+    try {
+      const days = TIMEFRAME_DAYS[timeframe] || 30;
+      const historicalSales = await getRawSalesHistory(days);
+
+      const { systemPrompt, userPrompt } = buildSalesPrompt(timeframe, historicalSales);
+      const aiResult = await callGeminiJSON({ systemPrompt, userPrompt });
+      const payload = normalizeSalesPayload(aiResult);
+
+      await AnalyticsCacheModel.upsert(cacheKey, payload, SF_CACHE_TTL_MS);
+      
+      // Binalik natin yung missing return para mabasa ng seed script mo
+      return payload; 
+    } catch (err) {
+      console.error("[SalesForecastService] Gemini forecast failed:", err.message);
+      return { chartData: [] };
+    }
   },
 };
 
