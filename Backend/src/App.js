@@ -10,10 +10,15 @@ const analyticsRoutes = require('./routes/analytics.routes.js');
 const { errorHandler } = require('./middleware/errorHandler.js'); 
 const { authMiddlewareJwt } = require('./middleware/auth.middleware.js'); 
 
+const customerRoutes = require('./routes/customer.routes.js');
+const orderRoutes = require('./routes/order.routes.js'); 
+const productRoutes = require('./routes/product.routes.js');
+
 const app = express(); 
 
 app.use(cors()); 
-app.use(express.json()); 
+//app.use(express.json()); 
+app.use(express.json({ limit: '25mb' }));
 
 // Ilagay ito pagkatapos ng app declaration at BAGO ang mga API routes
 app.use((req, res, next) => { 
@@ -36,7 +41,11 @@ app.get('/', (req, res) => {
   res.json({ status: 'CakeLytics backend is running' }); 
 });
 
-app.use('/api', authRoutes); 
+app.use('/api', authRoutes);  
+app.use('/api/customers', customerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/orders/checkout', orderRoutes);
+app.use('/api/products', productRoutes);
 
 
 // ── Protected (JWT required)
